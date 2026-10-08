@@ -15,15 +15,18 @@ interface Props {
   shape: number;
   color: string;
   reachScale: number;
+  zoom: boolean;         // true: csak a legnagyobb koltesu nap kornyeke latszik
 }
 
 const W_FALLBACK = 720;
 const H = 108;          // panelenkent
 const PAD = { top: 8, right: 8, bottom: 4, left: 52 };
 const TRUTH = 'var(--color-viz-truth)';
+const ELOTTE = 7;       // a kozeli ablak: ennyi nap a csucs elott...
+const UTANA = 21;       // ...es ennyi a csucs napjatol (egyutt 4 het)
 
 const Panel: React.FC<{
-  values: number[]; color: string; label: string; unit: string; last: boolean;
+  values: number[]; color: string; label: string; unit: string; last?: string;
   width: number; yMax?: number;
   truth?: number[];      // truth-marker: tinta referenciavonal a szines vonal alatt
   hover: number | null; handlers: CrosshairHandlers;
@@ -65,7 +68,7 @@ const Panel: React.FC<{
       {last && (
         <text x={width - PAD.right} y={H - PAD.bottom - 4} textAnchor="end"
               className="t-label-sm" fill="var(--color-on-surface-subtle)">
-          1096 nap
+          {last}
         </text>
       )}
       <Crosshair x0={PAD.left} x1={width - PAD.right} y0={PAD.top} y1={H - PAD.bottom}
@@ -76,7 +79,7 @@ const Panel: React.FC<{
   );
 };
 
-const ChainChart: React.FC<Props> = ({ spend, decay, half, truthDecay, truthHalf, shape, color, reachScale }) => {
+const ChainChart: React.FC<Props> = ({ spend, decay, half, truthDecay, truthHalf, shape, color, reachScale, zoom }) => {
   const { ref, width } = useContainerWidth(W_FALLBACK);
 
   const { adstocked, response } = useMemo(() => {
@@ -98,30 +101,45 @@ const ChainChart: React.FC<Props> = ({ spend, decay, half, truthDecay, truthHalf
   // A 3. panel mas mertekegyseg (session/nap), es ROGZITETT skalan fut: a
   // teteje a reachScale, vagyis a teljes telitodes latogatasszama. Ha a
   // vonal maximumahoz igazodna, a csuszkak szintvaltozasa nem latszana.
-  const sharedMax = Math.max(...spend, ...adstocked);
+  //
+  // A harom ev 1096 pontjan a lecsenges nem latszik: a bolt minden nap kolt,
+  // igy a 2. panel az 1. felnagyitott masanak tunik. A kozeli ablak a
+  // legnagyobb koltesu nap kornyeket mutatja, ahol az 1. panelen a kiugras
+  // masnapra eltunik, a 2. panelen napokig megmarad. Az adstock a TELJES
+  // sorozaton fut, es csak a rajzhoz vagjuk ki az ablakot: az ablak elso
+  // napja igy az elozo napok athozott hatasat is tartalmazza.
+  const csucs = spend.indexOf(Math.max(...spend));
+  const tol = zoom ? Math.max(0, csucs - ELOTTE) : 0;
+  const ig = zoom ? Math.min(spend.length, csucs + UTANA) : spend.length;
+  const lSpend = spend.slice(tol, ig);
+  const lAdstocked = adstocked.slice(tol, ig);
+  const lResponse = response.slice(tol, ig);
+  const lTruth = truthResponse.slice(tol, ig);
+  const sharedMax = Math.max(...lSpend, ...lAdstocked);
 
   // A harom panel ugyanazt a napot mutatja, ezert a celkereszt kozos: egy
   // tooltip adja mindharom erteket, es a mutato barmelyik panelen allhat.
-  const { index: hover, handlers } = useCrosshair(spend.length);
+  const { index: hover, handlers } = useCrosshair(lSpend.length);
   // Ugyanaz az x-lekepezes, mint a Panelben.
   const hoverX = hover === null ? 0
-    : PAD.left + (hover / (spend.length - 1)) * (width - PAD.right - PAD.left);
+    : PAD.left + (hover / (lSpend.length - 1)) * (width - PAD.right - PAD.left);
 
   return (
     <div ref={ref} className="relative flex flex-col">
-      <Panel values={spend} color={color} label="1 · napi költés" unit="Ft/nap"
-             last={false} width={width} yMax={sharedMax} hover={hover} handlers={handlers} />
-      <Panel values={adstocked} color={color} label="2 · lecsengéssel (adstock)" unit="Ft/nap"
-             last={false} width={width} yMax={sharedMax} hover={hover} handlers={handlers} />
-      <Panel values={response} color={color} label="3 · telítődés után" unit="látogatás/nap"
-             last width={width} yMax={reachScale} truth={moved ? truthResponse : undefined}
+      <Panel values={lSpend} color={color} label="1 · napi költés" unit="Ft/nap"
+             width={width} yMax={sharedMax} hover={hover} handlers={handlers} />
+      <Panel values={lAdstocked} color={color} label="2 · lecsengéssel (adstock)" unit="Ft/nap"
+             width={width} yMax={sharedMax} hover={hover} handlers={handlers} />
+      <Panel values={lResponse} color={color} label="3 · telítődés után" unit="látogatás/nap"
+             last={zoom ? `${tol + 1}–${ig}. nap` : `${spend.length} nap`}
+             width={width} yMax={reachScale} truth={moved ? lTruth : undefined}
              hover={hover} handlers={handlers} />
       {hover !== null && (
-        <ChartTooltip x={hoverX} width={width} title={`${hover + 1}. nap`} rows={[
-          { label: 'nyers költés', value: `${ft(spend[hover])} Ft`, color },
-          { label: 'adstock után', value: `${ft(adstocked[hover])} Ft`, color },
-          { label: 'szaturáció után', value: `${ft(response[hover])} session`, color },
-          ...(moved ? [{ label: 'igazság', value: `${ft(truthResponse[hover])} session`, color: TRUTH }] : []),
+        <ChartTooltip x={hoverX} width={width} title={`${tol + hover + 1}. nap`} rows={[
+          { label: 'nyers költés', value: `${ft(lSpend[hover])} Ft`, color },
+          { label: 'adstock után', value: `${ft(lAdstocked[hover])} Ft`, color },
+          { label: 'szaturáció után', value: `${ft(lResponse[hover])} session`, color },
+          ...(moved ? [{ label: 'igazság', value: `${ft(lTruth[hover])} session`, color: TRUTH }] : []),
         ]} />
       )}
     </div>

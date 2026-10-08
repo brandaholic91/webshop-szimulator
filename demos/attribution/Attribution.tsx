@@ -101,8 +101,9 @@ const Tables: React.FC<{ data: AttributionData; lookback: number }> = ({ data, l
 
 // A szovegek az alapallas (default_window) szamaibol dolgoznak, nem a
 // kapcsolo allasabol: a lecsukott blokk ne irodjon at olvasas kozben.
-// Az igazsag zaja csatornankent: a bevetel-arany szorasa a vilag ujrafuttatasaibol
-// (world/src/world/noise.py). Ha a fajl nem toltodik be, a mondat kimarad.
+// Az igazsag a vilag ujrafuttatasainak atlaga (53. dontes); ez a fajl egy futas
+// bevetel-aranyanak szorasat adja csatornankent (world/src/world/noise.py).
+// Ha nem toltodik be, a mondat kimarad.
 interface Noise { replicates: number; sd: Record<string, { share_of_revenue: number }> }
 
 function useNoise(): Noise | null {
@@ -198,19 +199,24 @@ const Folds: React.FC<{ data: AttributionData }> = ({ data }) => {
           organikusan vagy közvetlenül. A tracker ezt a sessiont a fizetett csatornán látja, és
           mind a négy modell ott számolja el. Élesben ennek a megfelelője a márkanévre futó
           keresési hirdetés. Az elfogás nem magyaráz meg minden eltérést: ahol egy modell az
-          igazság alatt mér (a fenti listában negatív előjel), ott vagy erősebb egy másik hatás,
-          amit ez a lap nem azonosít, vagy az eltérés az igazság zaján belül van.
+          igazság alatt mér (a fenti listában negatív előjel), ott egy ellenkező irányú hatás az
+          erősebb. A hirdetés a későbbi vásárlás esélyét is növeli, akkor is, ha az utolsó
+          látogatás már más csatornáról jön, és ezt az utolsó látogatásra figyelő modell nem írja
+          jóvá a hirdetésnek.
         </p>
         <p className="mt-3">
-          Az igazság csatornánként egy ellentényes futásból jön, és zajos.
+          Egyetlen ellentényes futás zajos, ezért az igazság itt sok újrafuttatás átlaga.
           {noise && (
             <>
-              {' '}A világot {noise.replicates}-szer újrafuttatva az igazság aránya ennyit szór:{' '}
+              {' '}A világ {noise.replicates}-szer futott újra; egy futás aránya ennyit szór:{' '}
               {groups.map(g => `${g.title} ±${pp(noise.sd[g.slug].share_of_revenue * 100)}`).join(', ')}.
+              Az átlag bizonytalansága ennél jóval kisebb:{' '}
+              {groups.map(g => `${g.title} ±${pp(noise.sd[g.slug].share_of_revenue * 100 / Math.sqrt(noise.replicates))}`).join(', ')}.
             </>
           )}
-          {' '}Az ennél kisebb eltérést ne olvasd tévedésnek, a modellek közötti kis különbséget
-          pedig sorrendnek.
+          {' '}A modellek viszont egyetlen futás adatából dolgoznak, tehát a becslésük is
+          hordoz véletlent, és ezt a lap nem méri. A modellek közötti kis különbséget ne olvasd
+          sorrendnek.
         </p>
         <p className="mt-3">
           A mérés az útvonalakat is csonkítja. A consent nélküli eszköz sessionjei hiányoznak, és

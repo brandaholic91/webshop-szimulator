@@ -15,6 +15,7 @@ const World: React.FC = () => {
   const [slug, setSlug] = useState(PAID[0].slug);
   const [decay, setDecay] = useState<number | null>(null);
   const [half, setHalf] = useState<number | null>(null);
+  const [kozeli, setKozeli] = useState(true);   // a lanc-abra ablaka: csucs kornyeke vagy a teljes idoszak
 
   const ch = data?.response.channels.find(c => c.slug === slug);
   const idx = data?.spend.channels.indexOf(slug) ?? -1;
@@ -66,7 +67,15 @@ const World: React.FC = () => {
   }
 
   const cf = data.incrementality.counterfactual[slug];
-  const zaj = data.noise.sd[slug];
+  // A lapon az ujrafuttatasok ATLAGA all (53. dontes): a ± az atlag standard
+  // hibaja, azaz egy futas szorasa osztva az ujrafuttatasok szamanak gyokevel.
+  const szoras = data.noise.sd[slug];
+  const gyok = Math.sqrt(data.noise.replicates);
+  const zaj = {
+    incremental_revenue_huf: szoras.incremental_revenue_huf / gyok,
+    true_roas: szoras.true_roas / gyok,
+    share_of_revenue: szoras.share_of_revenue / gyok,
+  };
   const szin = channelColor(slug);
 
   // 1096 nap = 156 teljes het + 4 nap: az utolso heti bucket csonka, es
@@ -128,9 +137,11 @@ const World: React.FC = () => {
               lejátszani.
             </p>
             <p className="t-body prose-col mt-3 text-on-surface-muted">
-              A szám nem hajszálpontos. A két futásban a véletlen is máshogy alakul, ezért egy-egy
-              héten az ellentényes vonal a tényleges fölé is kerülhet. A lenti számok mellett a ±
-              azt mutatja, mennyit szór az eredmény {data.noise.replicates} újrafuttatás alapján.
+              Egyetlen ilyen futáspár zajos, mert a két futásban a véletlen is máshogy alakul.
+              Ezért a bolt {data.noise.replicates}-szer újrafutott más sorsolással, hirdetéssel
+              és anélkül, és az ábra két vonala meg a lenti számok ezek átlagát mutatják. A ± az
+              átlag bizonytalansága. Egy-egy héten az ellentényes vonal így is a tényleges fölé
+              kerülhet.
             </p>
           </div>
         </div>
@@ -205,7 +216,9 @@ const World: React.FC = () => {
               az érték, amivel a világ valójában futott.
             </p>
             <p className="t-body prose-col mt-3 text-on-surface-muted">
-              A harmadik panelt érdemes figyelni. A teteje az a látogatásszám, amit a csatorna
+              Az ábra alapból a csatorna legnagyobb költésű napjának környékét mutatja, négy
+              hetet. Az első panelen a kiugrás másnapra eltűnik, a másodikon napokig megmarad:
+              ez a lecsengés. A harmadik panel teteje az a látogatásszám, amit a csatorna
               teljes telítődésnél hozna. Ha elmozdítod a csúszkákat, a színes vonal mutatja az új
               beállítást, a sötét vonal pedig azt, ami a boltban valójában történt.
             </p>
@@ -217,6 +230,18 @@ const World: React.FC = () => {
         <div className="g12">
           <div className="c3 pr-8">
             <div className="t-label-sm text-on-surface-subtle">Csatorna: {csatornaNev}</div>
+
+            <div className="mt-4 flex flex-col gap-y-1">
+              {[{ ertek: true, felirat: 'Négy hét a csúcs körül' },
+                { ertek: false, felirat: `Mind a ${spend.length} nap` }].map(o => (
+                <button key={o.felirat} type="button" onClick={() => setKozeli(o.ertek)}
+                        aria-pressed={o.ertek === kozeli}
+                        className={`t-label-sm rounded-sm border px-3 py-2 text-left max-md:py-3 ${
+                          o.ertek === kozeli ? 'border-border-strong bg-surface-sunken' : 'border-border'}`}>
+                  {o.felirat}
+                </button>
+              ))}
+            </div>
 
             <label className="mt-6 block">
               <span className="t-label-sm text-on-surface-subtle">Mennyi marad a hatásból másnapra (adstock λ)</span>
@@ -253,7 +278,7 @@ const World: React.FC = () => {
           <div className="c9 max-md:mt-6">
             <ChainChart spend={spend} decay={aktualisDecay} half={aktualisHalf}
                         truthDecay={ch.adstock_decay} truthHalf={ch.half_saturation_huf}
-                        shape={ch.shape} color={szin} reachScale={ch.reach_scale} />
+                        shape={ch.shape} color={szin} reachScale={ch.reach_scale} zoom={kozeli} />
           </div>
         </div>
       </Page>
@@ -300,16 +325,22 @@ const World: React.FC = () => {
             külön véletlen-stream kell: ez rögzíti a vásárlói kört és a többi csatorna napi
             költését, különben a nullázás az egész populációt elcsúsztatná, és a szám tiszta zaj
             lenne. Ami marad: a nullázás a látogatások, a vásárlások és a kosárértékek sorsolását
-            is elmozdítja, mind a hat csatornán. A két világ különbsége ezért a hirdetés hatása
-            plusz véletlen, és a szám <strong>nagyságrendet</strong> mutat, nem az utolsó forintig
-            pontos értéket — ugyanúgy, ahogy egy éles geo-lift teszt eredménye is ingadozna, ha
+            is elmozdítja, mind a hat csatornán. Két világ különbsége ezért a hirdetés hatása
+            plusz véletlen — ugyanúgy, ahogy egy éles geo-lift teszt eredménye is ingadozna, ha
             kétszer futtatnád le.
           </p>
           <p className="mt-3">
-            A zaj mérve van: a világ {data.noise.replicates}-szer újrafutott ugyanazokkal a
-            vásárlókkal és ugyanazzal a költéssel, más sorsolással, és mindegyik futáson ugyanez a
-            számítás ment. A számok melletti ± ennek a szórása. A lapon álló érték egyetlen futásé,
-            nem az újrafuttatások átlaga.
+            Ezért az igazság nem egyetlen futáspár: a világ {data.noise.replicates}-szer újrafutott
+            ugyanazokkal a vásárlókkal és ugyanazzal a költéssel, más sorsolással, mindegyik
+            futáson ugyanez a számítás ment, és a lapon ezek <strong>átlaga</strong> áll. Egyetlen
+            futás a(z) {csatornaNev} bevétel-arányán ±{(szoras.share_of_revenue * 100).toFixed(1)}{' '}
+            százalékpontot szór. A számok melletti ± az átlag standard hibája: ez a szórás osztva
+            az újrafuttatások számának négyzetgyökével.
+          </p>
+          <p className="mt-3">
+            A bolt saját számai a lap tetején (látogatás, rendelés, bevétel) egyetlen futásból
+            jönnek: ezt a futást méri a többi elemzés. A bevétele ezért kicsit eltér az ábra
+            tényleges vonalának összegétől, ami az újrafuttatások átlaga.
           </p>
         </Fold>
         <Fold title="Mikor számít ez élesben?">
@@ -332,7 +363,7 @@ const World: React.FC = () => {
             ellenőrzi, hogy a nullázott világban a populáció <em>bitre</em> azonos marad.
           </p>
           <p className="mt-3">
-            A lapon látható minden szám ebből a futásból jön. A csúszkák alapállása a világ
+            A lapon látható minden szám ebből a generátorból jön. A csúszkák alapállása a világ
             valódi paramétere.
           </p>
         </Fold>

@@ -1,6 +1,7 @@
 {
  "schema_version": 1,
  "seed": 20260827,
+ "replicates": 40,
  "adstock": {
   "google_ads": 0.3,
   "meta_ads": 0.6,
@@ -60,27 +61,27 @@
  "incrementality": {
   "google_ads": {
    "spend_huf": 16488458.0,
-   "total_revenue_huf": 329012724.0,
-   "counterfactual_revenue_huf": 282101102.0,
-   "incremental_revenue_huf": 46911622.0,
-   "true_roas": 2.8451188097759053,
-   "share_of_revenue": 0.14258300235221297
+   "total_revenue_huf": 327299878.3,
+   "counterfactual_revenue_huf": 283229864.875,
+   "incremental_revenue_huf": 44070013.42500001,
+   "true_roas": 2.672779554340376,
+   "share_of_revenue": 0.13464720382390685
   },
   "meta_ads": {
    "spend_huf": 12977482.0,
-   "total_revenue_huf": 329012724.0,
-   "counterfactual_revenue_huf": 281617811.0,
-   "incremental_revenue_huf": 47394913.0,
-   "true_roas": 3.6520885176338522,
-   "share_of_revenue": 0.14405191514720872
+   "total_revenue_huf": 327299878.3,
+   "counterfactual_revenue_huf": 284441513.2,
+   "incremental_revenue_huf": 42858365.100000024,
+   "true_roas": 3.3025177842666262,
+   "share_of_revenue": 0.13094525217243266
   },
   "arukereso": {
    "spend_huf": 7304018.0,
-   "total_revenue_huf": 329012724.0,
-   "counterfactual_revenue_huf": 313098823.0,
-   "incremental_revenue_huf": 15913901.0,
-   "true_roas": 2.178787209998661,
-   "share_of_revenue": 0.04836864911036085
+   "total_revenue_huf": 327299878.3,
+   "counterfactual_revenue_huf": 312443714.575,
+   "incremental_revenue_huf": 14856163.725000024,
+   "true_roas": 2.033971401083626,
+   "share_of_revenue": 0.04539006797730307
   }
  }
 }

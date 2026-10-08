@@ -29,8 +29,8 @@ Python 3.13 és [uv](https://docs.astral.sh/uv/) kell hozzá.
     uv sync
     uv run pytest                           # a világ tesztjei (pár perc)
     uv run python -m world.report           # kalibrációs riport
-    uv run python -m world.truth            # a világ + 3 ellentényes futás -> out/
-    uv run python -m world.noise            # 40 újrafuttatás -> out/world_noise.json
+    uv run python -m world.truth            # 40 újrajátszás, mindegyik 1 + 3 ellentényes világ -> out/ (~3 perc)
+    uv run python -m world.noise            # ugyanaz a 40 újrajátszás -> out/world_noise.json (~3 perc)
     uv run python -m world.export --emitted # csak az events_emitted.json; adatbázis nem kell
     uv run python -m world.publish          # out/ -> ../public/data/
 

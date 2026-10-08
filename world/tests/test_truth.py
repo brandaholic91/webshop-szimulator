@@ -4,7 +4,7 @@ import pytest
 from world.compare import load_truth
 from world.config import WORLD, PAID_SLUGS
 from world.dgp import run
-from world.truth import build_truth, incrementality
+from world.truth import REPLICATES, build_truth, incrementality, mean_incrementality
 
 
 @pytest.fixture(scope="module")
@@ -38,8 +38,27 @@ def test_a_roas_realis(inc):
         assert 0.2 < adat["true_roas"] < 12.0, slug
 
 
+def test_az_igazsag_a_replikak_atlaga():
+    """Az 53. döntés: az igazság nem egy futás. Két replikán kézzel utánaszámolva."""
+    atlag, heti = mean_incrementality(WORLD, replicates=2)
+    egy, ketto = incrementality(WORLD, rep=1), incrementality(WORLD, rep=2)
+    assert heti == pytest.approx(np.mean([egy[1], ketto[1]], axis=0))
+    for slug in PAID_SLUGS:
+        a, e, k = atlag[slug], egy[0][slug], ketto[0][slug]
+        for kulcs in ("total_revenue_huf", "counterfactual_revenue_huf", "incremental_revenue_huf"):
+            assert a[kulcs] == pytest.approx((e[kulcs] + k[kulcs]) / 2), (slug, kulcs)
+        assert a["spend_huf"] == e["spend_huf"] == k["spend_huf"]
+        # a fájlon belüli azonosságok az átlagon is állnak
+        assert a["incremental_revenue_huf"] == pytest.approx(
+            a["total_revenue_huf"] - a["counterfactual_revenue_huf"])
+        assert a["share_of_revenue"] == pytest.approx(
+            a["incremental_revenue_huf"] / a["total_revenue_huf"])
+        assert a["true_roas"] == pytest.approx(a["incremental_revenue_huf"] / a["spend_huf"])
+
+
 def test_a_truth_json_semaja():
-    truth, megjelenites = build_truth(WORLD)
+    truth, megjelenites = build_truth(WORLD, replicates=1)
+    assert truth["replicates"] == 1
     assert truth["schema_version"] == 1
     assert set(truth) >= {
         "schema_version", "seed", "adstock", "saturation",
@@ -54,5 +73,9 @@ def test_a_truth_json_semaja():
 def test_az_elfogas_nem_mozditja_az_igazsagot():
     """Az elfogás csak session-címkét ír át (37. döntés), tehát az újraszámolt
     igazság a commitolt truth.json-nal egyezik. Ha ez bukik, valami csatornát
-    olvas a konverzióban vagy a rendelésben, és minden commitolt out/ érvénytelen."""
-    assert build_truth(WORLD)[0] == load_truth()
+    olvas a konverzióban vagy a rendelésben, és minden commitolt out/ érvénytelen.
+
+    A készlet leglassabb tesztje: mind a REPLICATES replikát újrafuttatja."""
+    truth = load_truth()
+    assert truth["replicates"] == REPLICATES
+    assert build_truth(WORLD)[0] == truth

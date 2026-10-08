@@ -9,8 +9,8 @@ REPLICATES-szer újrafut: a populáció és a költés ugyanaz marad, a többi r
 új streamet kap, és minden replikán ugyanaz a számítás megy, mint a truth.py-ban.
 A kimenet a három mérték SZÓRÁSA csatornánként.
 
-Az igazság-fájlt nem olvassa és nem írja; a lap száma továbbra is a truth.py
-egyetlen futása, ez a modul csak a ± jelet adja mellé.
+Az igazság-fájlt nem olvassa és nem írja. A lap száma ugyanezeknek a replikáknak
+az ÁTLAGA, azt a truth.py számolja (53. döntés); ez a modul a szórást adja mellé.
 """
 import json
 from multiprocessing import Pool
@@ -19,21 +19,8 @@ import numpy as np
 
 from .config import PAID_SLUGS, WORLD
 from .dgp import run
-from .rng import streams
-from .truth import OUT
-
-REPLICATES = 40
-VALTOZO = ("touch", "conversion", "orders", "capture")   # a populáció és a költés marad
-
-
-def replica_streams(seed: int, rep: int) -> dict[str, np.random.Generator]:
-    """Az eredeti streamek, a VALTOZO rétegeken a `rep`-hez tartozó újakkal."""
-    gen = streams(seed)
-    uj = np.random.SeedSequence([seed, rep]).spawn(len(VALTOZO))
-    for nev, mag in zip(VALTOZO, uj):
-        gen[nev] = np.random.default_rng(mag)
-    return gen
-
+from .rng import replica_streams
+from .truth import OUT, REPLICATES
 
 def replica(rep: int) -> dict[str, dict[str, float]]:
     """Egy replika: csatornánként inkrementális bevétel, ROAS és bevétel-arány."""

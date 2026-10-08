@@ -9,11 +9,17 @@ nem egyenlő a valódi inkrementális hozzájárulással.
 
 Ez a szimulált holdout — pontosan az, amit egy geo-lift teszt csinálna élesben.
 
+Egyetlen ilyen különbség zajos: a nullázás a sorsolásokat is elmozdítja (rng.py),
+és a szám csatornánként kb. 0,8 százalékpontot szór. Ezért az igazság REPLICATES
+újrajátszás ÁTLAGA (53. döntés): ugyanaz a populáció és költés, más sorsolás,
+mindegyiken 1 teljes + 3 ellentényes világ.
+
 A 24. döntés miatt ez a modul ÍR két fájlt ugyanabból a memóriában lévő
 eredményből: a truth.json-t a szerződésnek, és a megjelenítési JSON-okat a
 lapnak. Senki nem olvassa újra a truth.json-t — azt csak a compare.py teszi.
 """
 import json
+from multiprocessing import Pool
 from pathlib import Path
 
 import numpy as np
@@ -21,11 +27,14 @@ import numpy as np
 from .config import ALL_SLUGS, PAID_SLUGS, WORLD, WorldConfig
 from .dgp import World, run, seasonality
 from .response import saturate
+from .rng import replica_streams
 
 OUT = Path(__file__).resolve().parents[2] / "out"
 
 # A TS-implementáció önellenőrzési pontjai (27. döntés). Ft/nap adstockolt költés.
 REF_PONTOK = [0, 2_000, 5_000, 10_000, 20_000, 40_000, 80_000]
+
+REPLICATES = 40   # ennyi újrajátszás átlaga az igazság; a noise.py ugyanezekből méri a szórást
 
 
 def _heti_bevetel(w: World) -> list[float]:
@@ -34,42 +43,83 @@ def _heti_bevetel(w: World) -> list[float]:
     return np.bincount(het, weights=w.orders["value_huf"], minlength=n_het).tolist()
 
 
-def incrementality(cfg: WorldConfig) -> tuple[dict[str, dict], list[float]]:
-    """Csatornánként egy ellentényes futás. Összesen 1 + 3 világ.
+def incrementality(cfg: WorldConfig, rep: int | None = None) -> tuple[dict[str, dict], list[float]]:
+    """EGY futás: csatornánként egy ellentényes világ. Összesen 1 + 3 világ.
 
-    Visszaad: (csatornánkénti igazság, a TELJES világ heti bevétele).
+    `rep`: None a világ saját streamjeivel fut, szám a `rep`. replikáéval.
+
+    Visszaad: (csatornánkénti számok, a TELJES világ heti bevétele).
     A kettő azért külön, hogy a csatorna-dict minden eleme ugyanolyan alakú
     legyen — különben minden rajta iteráló hívó és teszt elhasalna egy
     kilógó kulcson.
     """
-    teljes = run(cfg)
+    def gen():
+        return None if rep is None else replica_streams(cfg.seed, rep)
+
+    teljes = run(cfg, gen())
     teljes_bevetel = float(teljes.orders["value_huf"].sum())
 
     ki = {}
     for j, slug in enumerate(PAID_SLUGS):
-        nelkule = run(cfg.zero_spend(slug))
-        nelkule_bevetel = float(nelkule.orders["value_huf"].sum())
-        koltes = float(teljes.spend[:, j].sum())
-        delta = teljes_bevetel - nelkule_bevetel
-        ki[slug] = {
-            "spend_huf": koltes,
-            "total_revenue_huf": teljes_bevetel,
-            "counterfactual_revenue_huf": nelkule_bevetel,
-            "incremental_revenue_huf": delta,
-            "true_roas": delta / koltes if koltes else 0.0,
-            "share_of_revenue": delta / teljes_bevetel,
-            "weekly_revenue_counterfactual": _heti_bevetel(nelkule),
-        }
+        nelkule = run(cfg.zero_spend(slug), gen())
+        ki[slug] = _szamok(
+            koltes=float(teljes.spend[:, j].sum()),
+            teljes_bevetel=teljes_bevetel,
+            nelkule_bevetel=float(nelkule.orders["value_huf"].sum()),
+            nelkule_heti=_heti_bevetel(nelkule),
+        )
     return ki, _heti_bevetel(teljes)
 
 
-def build_truth(cfg: WorldConfig) -> tuple[dict, dict]:
+def _szamok(koltes: float, teljes_bevetel: float, nelkule_bevetel: float,
+            nelkule_heti: list[float]) -> dict:
+    delta = teljes_bevetel - nelkule_bevetel
+    return {
+        "spend_huf": koltes,
+        "total_revenue_huf": teljes_bevetel,
+        "counterfactual_revenue_huf": nelkule_bevetel,
+        "incremental_revenue_huf": delta,
+        "true_roas": delta / koltes if koltes else 0.0,
+        "share_of_revenue": delta / teljes_bevetel,
+        "weekly_revenue_counterfactual": nelkule_heti,
+    }
+
+
+def mean_incrementality(cfg: WorldConfig,
+                        replicates: int = REPLICATES) -> tuple[dict[str, dict], list[float]]:
+    """Az igazság: `replicates` újrajátszás átlaga (53. döntés). Alakja az incrementality()-é.
+
+    A bevételeket átlagolja (a teljes és az ellentényes világét, hetente is), a
+    ROAS és az arány az átlagokból jön. Így a fájlon belül minden azonosság áll:
+    inkrementális = teljes − ellentényes, arány = inkrementális / teljes.
+    A költés minden replikán ugyanaz.
+    """
+    with Pool() as pool:
+        futasok = pool.starmap(incrementality, [(cfg, r) for r in range(1, replicates + 1)])
+
+    def atlag(ertekek):
+        return np.mean(list(ertekek), axis=0)
+
+    ki = {}
+    for slug in PAID_SLUGS:
+        csatorna = [inc[slug] for inc, _ in futasok]
+        ki[slug] = _szamok(
+            koltes=csatorna[0]["spend_huf"],
+            teljes_bevetel=float(atlag(c["total_revenue_huf"] for c in csatorna)),
+            nelkule_bevetel=float(atlag(c["counterfactual_revenue_huf"] for c in csatorna)),
+            nelkule_heti=atlag(c["weekly_revenue_counterfactual"] for c in csatorna).tolist(),
+        )
+    return ki, atlag(heti for _, heti in futasok).tolist()
+
+
+def build_truth(cfg: WorldConfig, replicates: int = REPLICATES) -> tuple[dict, dict]:
     """(truth.json tartalma, a lapnak szánt megjelenítési dict)."""
-    inc, teljes_heti = incrementality(cfg)
+    inc, teljes_heti = mean_incrementality(cfg, replicates)
 
     truth = {
         "schema_version": 1,
         "seed": cfg.seed,
+        "replicates": replicates,
         "adstock": {s: cfg.channel(s).adstock_decay for s in PAID_SLUGS},
         "saturation": {
             s: {
@@ -122,7 +172,7 @@ def _write(nev: str, adat: dict) -> None:
 
 def main() -> None:
     cfg = WORLD
-    print("A világ futtatása (1 teljes + 3 ellentényes)…")
+    print(f"{REPLICATES} újrajátszás, mindegyik 1 teljes + 3 ellentényes világ (kb. 3 perc)…")
     truth, megjelenites = build_truth(cfg)
     w = run(cfg)
     szez = seasonality(cfg)
@@ -164,7 +214,8 @@ def main() -> None:
     })
     _write("world_outcome.json", {
         "start": cfg.start.isoformat(),
-        "weekly_revenue_huf": [int(x) for x in megjelenites["weekly_revenue"]],
+        # A bolt maga EGY futás (ezt méri a pipeline), nem az újrajátszások átlaga.
+        "weekly_revenue_huf": [int(x) for x in _heti_bevetel(w)],
         "weekly_orders": np.bincount(w.orders["day"] // 7,
                                      minlength=(cfg.n_days + 6) // 7).tolist(),
         # Mindhárom heti sorozat UGYANANNYI pontot ad (157), különben a lap
