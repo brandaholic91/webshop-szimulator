@@ -1,0 +1,86 @@
+{
+ "schema_version": 1,
+ "seed": 20260827,
+ "adstock": {
+  "google_ads": 0.3,
+  "meta_ads": 0.6,
+  "arukereso": 0.15
+ },
+ "saturation": {
+  "google_ads": {
+   "half_saturation_huf": 20000.0,
+   "shape": 1.5
+  },
+  "meta_ads": {
+   "half_saturation_huf": 16000.0,
+   "shape": 1.2
+  },
+  "arukereso": {
+   "half_saturation_huf": 9000.0,
+   "shape": 2.0
+  }
+ },
+ "base_demand": {
+  "sessions_start": 569.0,
+  "sessions_end": 733.0,
+  "weekday_factor": [
+   1.1,
+   1.08,
+   1.04,
+   1.0,
+   0.94,
+   0.82,
+   0.92
+  ],
+  "yearly_amplitude": 0.16,
+  "q4_boost": 1.22
+ },
+ "segments": {
+  "alkalmi": {
+   "share": 0.45,
+   "aov_factor": 0.85,
+   "churn_hazard_daily": 0.0001
+  },
+  "arvadasz": {
+   "share": 0.25,
+   "aov_factor": 0.8,
+   "churn_hazard_daily": 8e-05
+  },
+  "markahu": {
+   "share": 0.2,
+   "aov_factor": 1.15,
+   "churn_hazard_daily": 5e-05
+  },
+  "nagykosaras": {
+   "share": 0.1,
+   "aov_factor": 2.1,
+   "churn_hazard_daily": 7e-05
+  }
+ },
+ "incrementality": {
+  "google_ads": {
+   "spend_huf": 16488458.0,
+   "total_revenue_huf": 329012724.0,
+   "counterfactual_revenue_huf": 282101102.0,
+   "incremental_revenue_huf": 46911622.0,
+   "true_roas": 2.8451188097759053,
+   "share_of_revenue": 0.14258300235221297
+  },
+  "meta_ads": {
+   "spend_huf": 12977482.0,
+   "total_revenue_huf": 329012724.0,
+   "counterfactual_revenue_huf": 281617811.0,
+   "incremental_revenue_huf": 47394913.0,
+   "true_roas": 3.6520885176338522,
+   "share_of_revenue": 0.14405191514720872
+  },
+  "arukereso": {
+   "spend_huf": 7304018.0,
+   "total_revenue_huf": 329012724.0,
+   "counterfactual_revenue_huf": 313098823.0,
+   "incremental_revenue_huf": 15913901.0,
+   "true_roas": 2.178787209998661,
+   "share_of_revenue": 0.04836864911036085
+  }
+ }
+}

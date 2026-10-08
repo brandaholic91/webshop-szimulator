@@ -1,0 +1,593 @@
+{
+ "schema_version": 1,
+ "journeys": [
+  {
+   "kind": "stitched_two_devices",
+   "raw_events": [
+    {
+     "event_id": "d07186fe-83d8-53cc-9917-6b5840c56deb",
+     "event_name": "page_view",
+     "occurred_at": "2023-04-25T14:09:03+00:00",
+     "received_at": "2026-10-07T09:17:22.332873+00:00",
+     "session_id": "d08ff012-d346-5325-a3f9-4ff2b3641407",
+     "anonymous_id": "983d0532-9083-508f-9644-d13bcbef6f60",
+     "page_url": "https://bolt.example/",
+     "referrer": null,
+     "utm_source": "google",
+     "utm_medium": "cpc",
+     "payload": {}
+    },
+    {
+     "event_id": "051a2368-304e-5edf-834c-8324cab2caa4",
+     "event_name": "page_view",
+     "occurred_at": "2023-04-25T14:09:07+00:00",
+     "received_at": "2026-10-07T09:17:22.332873+00:00",
+     "session_id": "d08ff012-d346-5325-a3f9-4ff2b3641407",
+     "anonymous_id": "983d0532-9083-508f-9644-d13bcbef6f60",
+     "page_url": "https://bolt.example/kategoria/4",
+     "referrer": null,
+     "utm_source": null,
+     "utm_medium": null,
+     "payload": {}
+    },
+    {
+     "event_id": "2338cce8-c836-5498-a679-8e422d19f3c4",
+     "event_name": "page_view",
+     "occurred_at": "2023-04-25T14:09:38+00:00",
+     "received_at": "2026-10-07T09:17:22.332873+00:00",
+     "session_id": "d08ff012-d346-5325-a3f9-4ff2b3641407",
+     "anonymous_id": "983d0532-9083-508f-9644-d13bcbef6f60",
+     "page_url": "https://bolt.example/kategoria/10",
+     "referrer": null,
+     "utm_source": null,
+     "utm_medium": null,
+     "payload": {}
+    },
+    {
+     "event_id": "f0b9e80a-4a2d-5144-b1df-2d73e57e2269",
+     "event_name": "page_view",
+     "occurred_at": "2023-04-25T14:09:53+00:00",
+     "received_at": "2026-10-07T09:17:22.332873+00:00",
+     "session_id": "d08ff012-d346-5325-a3f9-4ff2b3641407",
+     "anonymous_id": "983d0532-9083-508f-9644-d13bcbef6f60",
+     "page_url": "https://bolt.example/kategoria/1",
+     "referrer": null,
+     "utm_source": null,
+     "utm_medium": null,
+     "payload": {}
+    },
+    {
+     "event_id": "ecb10c78-8975-59e4-a01a-8110ffa92845",
+     "event_name": "view_item",
+     "occurred_at": "2023-04-25T14:11:40+00:00",
+     "received_at": "2026-10-07T09:17:22.332873+00:00",
+     "session_id": "d08ff012-d346-5325-a3f9-4ff2b3641407",
+     "anonymous_id": "983d0532-9083-508f-9644-d13bcbef6f60",
+     "page_url": "https://bolt.example/termek/117",
+     "referrer": null,
+     "utm_source": null,
+     "utm_medium": null,
+     "payload": {
+      "item_id": "sku-117"
+     }
+    },
+    {
+     "event_id": "4cc5d94b-aae6-5f97-9a0d-a2b4ed6e070b",
+     "event_name": "page_view",
+     "occurred_at": "2023-04-25T14:11:51+00:00",
+     "received_at": "2026-10-07T09:17:22.386928+00:00",
+     "session_id": "d08ff012-d346-5325-a3f9-4ff2b3641407",
+     "anonymous_id": "983d0532-9083-508f-9644-d13bcbef6f60",
+     "page_url": "https://bolt.example/kategoria/7",
+     "referrer": null,
+     "utm_source": null,
+     "utm_medium": null,
+     "payload": {}
+    },
+    {
+     "event_id": "e3bcbd88-29b2-5687-bc84-e3c887f9cf5c",
+     "event_name": "view_item",
+     "occurred_at": "2023-04-25T14:12:02+00:00",
+     "received_at": "2026-10-07T09:17:22.386928+00:00",
+     "session_id": "d08ff012-d346-5325-a3f9-4ff2b3641407",
+     "anonymous_id": "983d0532-9083-508f-9644-d13bcbef6f60",
+     "page_url": "https://bolt.example/termek/41",
+     "referrer": null,
+     "utm_source": null,
+     "utm_medium": null,
+     "payload": {
+      "item_id": "sku-041"
+     }
+    },
+    {
+     "event_id": "f989e040-407a-5758-b21e-38bbb37e597e",
+     "event_name": "add_to_cart",
+     "occurred_at": "2023-04-25T14:13:38+00:00",
+     "received_at": "2026-10-07T09:17:22.386928+00:00",
+     "session_id": "d08ff012-d346-5325-a3f9-4ff2b3641407",
+     "anonymous_id": "983d0532-9083-508f-9644-d13bcbef6f60",
+     "page_url": "https://bolt.example/termek/41",
+     "referrer": null,
+     "utm_source": null,
+     "utm_medium": null,
+     "payload": {
+      "item_id": "sku-041"
+     }
+    },
+    {
+     "event_id": "f84f35f9-de28-59a5-93bb-617400daf1d9",
+     "event_name": "begin_checkout",
+     "occurred_at": "2023-04-25T14:14:53+00:00",
+     "received_at": "2026-10-07T09:17:22.386928+00:00",
+     "session_id": "d08ff012-d346-5325-a3f9-4ff2b3641407",
+     "anonymous_id": "983d0532-9083-508f-9644-d13bcbef6f60",
+     "page_url": "https://bolt.example/penztar",
+     "referrer": null,
+     "utm_source": null,
+     "utm_medium": null,
+     "payload": {}
+    },
+    {
+     "event_id": "b96f82f1-adc0-5f8a-80bc-dc61fbe13769",
+     "event_name": "purchase",
+     "occurred_at": "2023-04-25T14:15:30+00:00",
+     "received_at": "2026-10-07T09:17:22.386928+00:00",
+     "session_id": "d08ff012-d346-5325-a3f9-4ff2b3641407",
+     "anonymous_id": "983d0532-9083-508f-9644-d13bcbef6f60",
+     "page_url": "https://bolt.example/koszonjuk",
+     "referrer": null,
+     "utm_source": null,
+     "utm_medium": null,
+     "payload": {
+      "value": 8963,
+      "currency": "HUF",
+      "order_id": "ord-001253",
+      "customer_key": "0028e9bc-05cf-5caa-9e53-d6fc4d25ffb8"
+     }
+    },
+    {
+     "event_id": "579ca005-0bfd-548c-9d57-1a483b64013c",
+     "event_name": "page_view",
+     "occurred_at": "2025-11-19T12:46:55+00:00",
+     "received_at": "2026-10-07T09:21:25.762685+00:00",
+     "session_id": "c85675c5-25ae-54e2-8952-a99b7daa2c83",
+     "anonymous_id": "4e008568-19b6-5189-a907-5d46b1fe83cf",
+     "page_url": "https://bolt.example/",
+     "referrer": "https://www.google.com/",
+     "utm_source": null,
+     "utm_medium": null,
+     "payload": {}
+    },
+    {
+     "event_id": "e2ade0b1-f77f-5a02-baf3-e96058e6c9ee",
+     "event_name": "view_item",
+     "occurred_at": "2025-11-19T12:47:18+00:00",
+     "received_at": "2026-10-07T09:21:25.762685+00:00",
+     "session_id": "c85675c5-25ae-54e2-8952-a99b7daa2c83",
+     "anonymous_id": "4e008568-19b6-5189-a907-5d46b1fe83cf",
+     "page_url": "https://bolt.example/termek/197",
+     "referrer": null,
+     "utm_source": null,
+     "utm_medium": null,
+     "payload": {
+      "item_id": "sku-197"
+     }
+    },
+    {
+     "event_id": "c2ab74a4-9bb7-5c59-bc63-f45f23e21dd5",
+     "event_name": "view_item",
+     "occurred_at": "2025-11-19T12:49:23+00:00",
+     "received_at": "2026-10-07T09:21:25.762685+00:00",
+     "session_id": "c85675c5-25ae-54e2-8952-a99b7daa2c83",
+     "anonymous_id": "4e008568-19b6-5189-a907-5d46b1fe83cf",
+     "page_url": "https://bolt.example/termek/165",
+     "referrer": null,
+     "utm_source": null,
+     "utm_medium": null,
+     "payload": {
+      "item_id": "sku-165"
+     }
+    },
+    {
+     "event_id": "78f725d8-5700-5227-a397-28a32a341cdb",
+     "event_name": "view_item",
+     "occurred_at": "2025-11-19T12:49:37+00:00",
+     "received_at": "2026-10-07T09:21:25.762685+00:00",
+     "session_id": "c85675c5-25ae-54e2-8952-a99b7daa2c83",
+     "anonymous_id": "4e008568-19b6-5189-a907-5d46b1fe83cf",
+     "page_url": "https://bolt.example/termek/132",
+     "referrer": null,
+     "utm_source": null,
+     "utm_medium": null,
+     "payload": {
+      "item_id": "sku-132"
+     }
+    },
+    {
+     "event_id": "ab6e647b-e175-5743-943d-5d7b61e8f74f",
+     "event_name": "add_to_cart",
+     "occurred_at": "2025-11-19T12:49:49+00:00",
+     "received_at": "2026-10-07T09:21:25.762685+00:00",
+     "session_id": "c85675c5-25ae-54e2-8952-a99b7daa2c83",
+     "anonymous_id": "4e008568-19b6-5189-a907-5d46b1fe83cf",
+     "page_url": "https://bolt.example/termek/132",
+     "referrer": null,
+     "utm_source": null,
+     "utm_medium": null,
+     "payload": {
+      "item_id": "sku-132"
+     }
+    },
+    {
+     "event_id": "b77de6c3-4897-53d5-a0d2-0814926ce2a8",
+     "event_name": "begin_checkout",
+     "occurred_at": "2025-11-19T12:51:31+00:00",
+     "received_at": "2026-10-07T09:21:25.762685+00:00",
+     "session_id": "c85675c5-25ae-54e2-8952-a99b7daa2c83",
+     "anonymous_id": "4e008568-19b6-5189-a907-5d46b1fe83cf",
+     "page_url": "https://bolt.example/penztar",
+     "referrer": null,
+     "utm_source": null,
+     "utm_medium": null,
+     "payload": {}
+    },
+    {
+     "event_id": "cef3bd14-dad9-5725-becc-97328d96a4b4",
+     "event_name": "purchase",
+     "occurred_at": "2025-11-19T12:51:37+00:00",
+     "received_at": "2026-10-07T09:21:25.762685+00:00",
+     "session_id": "c85675c5-25ae-54e2-8952-a99b7daa2c83",
+     "anonymous_id": "4e008568-19b6-5189-a907-5d46b1fe83cf",
+     "page_url": "https://bolt.example/koszonjuk",
+     "referrer": null,
+     "utm_source": null,
+     "utm_medium": null,
+     "payload": {
+      "value": 10013,
+      "currency": "HUF",
+      "order_id": "ord-016456",
+      "customer_key": "0028e9bc-05cf-5caa-9e53-d6fc4d25ffb8"
+     }
+    }
+   ],
+   "clean_events": [
+    {
+     "event_id": "d07186fe-83d8-53cc-9917-6b5840c56deb",
+     "event_name": "page_view",
+     "occurred_at": "2023-04-25T14:09:03+00:00",
+     "session_id": "d08ff012-d346-5325-a3f9-4ff2b3641407",
+     "anonymous_id": "983d0532-9083-508f-9644-d13bcbef6f60",
+     "source_medium": "google / cpc",
+     "person_id": "0028e9bc-05cf-5caa-9e53-d6fc4d25ffb8"
+    },
+    {
+     "event_id": "051a2368-304e-5edf-834c-8324cab2caa4",
+     "event_name": "page_view",
+     "occurred_at": "2023-04-25T14:09:07+00:00",
+     "session_id": "d08ff012-d346-5325-a3f9-4ff2b3641407",
+     "anonymous_id": "983d0532-9083-508f-9644-d13bcbef6f60",
+     "source_medium": "direct / none",
+     "person_id": "0028e9bc-05cf-5caa-9e53-d6fc4d25ffb8"
+    },
+    {
+     "event_id": "2338cce8-c836-5498-a679-8e422d19f3c4",
+     "event_name": "page_view",
+     "occurred_at": "2023-04-25T14:09:38+00:00",
+     "session_id": "d08ff012-d346-5325-a3f9-4ff2b3641407",
+     "anonymous_id": "983d0532-9083-508f-9644-d13bcbef6f60",
+     "source_medium": "direct / none",
+     "person_id": "0028e9bc-05cf-5caa-9e53-d6fc4d25ffb8"
+    },
+    {
+     "event_id": "f0b9e80a-4a2d-5144-b1df-2d73e57e2269",
+     "event_name": "page_view",
+     "occurred_at": "2023-04-25T14:09:53+00:00",
+     "session_id": "d08ff012-d346-5325-a3f9-4ff2b3641407",
+     "anonymous_id": "983d0532-9083-508f-9644-d13bcbef6f60",
+     "source_medium": "direct / none",
+     "person_id": "0028e9bc-05cf-5caa-9e53-d6fc4d25ffb8"
+    },
+    {
+     "event_id": "ecb10c78-8975-59e4-a01a-8110ffa92845",
+     "event_name": "view_item",
+     "occurred_at": "2023-04-25T14:11:40+00:00",
+     "session_id": "d08ff012-d346-5325-a3f9-4ff2b3641407",
+     "anonymous_id": "983d0532-9083-508f-9644-d13bcbef6f60",
+     "source_medium": "direct / none",
+     "person_id": "0028e9bc-05cf-5caa-9e53-d6fc4d25ffb8"
+    },
+    {
+     "event_id": "4cc5d94b-aae6-5f97-9a0d-a2b4ed6e070b",
+     "event_name": "page_view",
+     "occurred_at": "2023-04-25T14:11:51+00:00",
+     "session_id": "d08ff012-d346-5325-a3f9-4ff2b3641407",
+     "anonymous_id": "983d0532-9083-508f-9644-d13bcbef6f60",
+     "source_medium": "direct / none",
+     "person_id": "0028e9bc-05cf-5caa-9e53-d6fc4d25ffb8"
+    },
+    {
+     "event_id": "e3bcbd88-29b2-5687-bc84-e3c887f9cf5c",
+     "event_name": "view_item",
+     "occurred_at": "2023-04-25T14:12:02+00:00",
+     "session_id": "d08ff012-d346-5325-a3f9-4ff2b3641407",
+     "anonymous_id": "983d0532-9083-508f-9644-d13bcbef6f60",
+     "source_medium": "direct / none",
+     "person_id": "0028e9bc-05cf-5caa-9e53-d6fc4d25ffb8"
+    },
+    {
+     "event_id": "f989e040-407a-5758-b21e-38bbb37e597e",
+     "event_name": "add_to_cart",
+     "occurred_at": "2023-04-25T14:13:38+00:00",
+     "session_id": "d08ff012-d346-5325-a3f9-4ff2b3641407",
+     "anonymous_id": "983d0532-9083-508f-9644-d13bcbef6f60",
+     "source_medium": "direct / none",
+     "person_id": "0028e9bc-05cf-5caa-9e53-d6fc4d25ffb8"
+    },
+    {
+     "event_id": "f84f35f9-de28-59a5-93bb-617400daf1d9",
+     "event_name": "begin_checkout",
+     "occurred_at": "2023-04-25T14:14:53+00:00",
+     "session_id": "d08ff012-d346-5325-a3f9-4ff2b3641407",
+     "anonymous_id": "983d0532-9083-508f-9644-d13bcbef6f60",
+     "source_medium": "direct / none",
+     "person_id": "0028e9bc-05cf-5caa-9e53-d6fc4d25ffb8"
+    },
+    {
+     "event_id": "b96f82f1-adc0-5f8a-80bc-dc61fbe13769",
+     "event_name": "purchase",
+     "occurred_at": "2023-04-25T14:15:30+00:00",
+     "session_id": "d08ff012-d346-5325-a3f9-4ff2b3641407",
+     "anonymous_id": "983d0532-9083-508f-9644-d13bcbef6f60",
+     "source_medium": "direct / none",
+     "person_id": "0028e9bc-05cf-5caa-9e53-d6fc4d25ffb8"
+    },
+    {
+     "event_id": "579ca005-0bfd-548c-9d57-1a483b64013c",
+     "event_name": "page_view",
+     "occurred_at": "2025-11-19T12:46:55+00:00",
+     "session_id": "c85675c5-25ae-54e2-8952-a99b7daa2c83",
+     "anonymous_id": "4e008568-19b6-5189-a907-5d46b1fe83cf",
+     "source_medium": "google / organic",
+     "person_id": "0028e9bc-05cf-5caa-9e53-d6fc4d25ffb8"
+    },
+    {
+     "event_id": "e2ade0b1-f77f-5a02-baf3-e96058e6c9ee",
+     "event_name": "view_item",
+     "occurred_at": "2025-11-19T12:47:18+00:00",
+     "session_id": "c85675c5-25ae-54e2-8952-a99b7daa2c83",
+     "anonymous_id": "4e008568-19b6-5189-a907-5d46b1fe83cf",
+     "source_medium": "direct / none",
+     "person_id": "0028e9bc-05cf-5caa-9e53-d6fc4d25ffb8"
+    },
+    {
+     "event_id": "c2ab74a4-9bb7-5c59-bc63-f45f23e21dd5",
+     "event_name": "view_item",
+     "occurred_at": "2025-11-19T12:49:23+00:00",
+     "session_id": "c85675c5-25ae-54e2-8952-a99b7daa2c83",
+     "anonymous_id": "4e008568-19b6-5189-a907-5d46b1fe83cf",
+     "source_medium": "direct / none",
+     "person_id": "0028e9bc-05cf-5caa-9e53-d6fc4d25ffb8"
+    },
+    {
+     "event_id": "78f725d8-5700-5227-a397-28a32a341cdb",
+     "event_name": "view_item",
+     "occurred_at": "2025-11-19T12:49:37+00:00",
+     "session_id": "c85675c5-25ae-54e2-8952-a99b7daa2c83",
+     "anonymous_id": "4e008568-19b6-5189-a907-5d46b1fe83cf",
+     "source_medium": "direct / none",
+     "person_id": "0028e9bc-05cf-5caa-9e53-d6fc4d25ffb8"
+    },
+    {
+     "event_id": "ab6e647b-e175-5743-943d-5d7b61e8f74f",
+     "event_name": "add_to_cart",
+     "occurred_at": "2025-11-19T12:49:49+00:00",
+     "session_id": "c85675c5-25ae-54e2-8952-a99b7daa2c83",
+     "anonymous_id": "4e008568-19b6-5189-a907-5d46b1fe83cf",
+     "source_medium": "direct / none",
+     "person_id": "0028e9bc-05cf-5caa-9e53-d6fc4d25ffb8"
+    },
+    {
+     "event_id": "b77de6c3-4897-53d5-a0d2-0814926ce2a8",
+     "event_name": "begin_checkout",
+     "occurred_at": "2025-11-19T12:51:31+00:00",
+     "session_id": "c85675c5-25ae-54e2-8952-a99b7daa2c83",
+     "anonymous_id": "4e008568-19b6-5189-a907-5d46b1fe83cf",
+     "source_medium": "direct / none",
+     "person_id": "0028e9bc-05cf-5caa-9e53-d6fc4d25ffb8"
+    },
+    {
+     "event_id": "cef3bd14-dad9-5725-becc-97328d96a4b4",
+     "event_name": "purchase",
+     "occurred_at": "2025-11-19T12:51:37+00:00",
+     "session_id": "c85675c5-25ae-54e2-8952-a99b7daa2c83",
+     "anonymous_id": "4e008568-19b6-5189-a907-5d46b1fe83cf",
+     "source_medium": "direct / none",
+     "person_id": "0028e9bc-05cf-5caa-9e53-d6fc4d25ffb8"
+    }
+   ],
+   "orders": [
+    {
+     "order_id": "ord-001253",
+     "event_id": "b96f82f1-adc0-5f8a-80bc-dc61fbe13769",
+     "value": 8963,
+     "currency": "HUF",
+     "customer_key": "0028e9bc-05cf-5caa-9e53-d6fc4d25ffb8",
+     "anonymous_id": "983d0532-9083-508f-9644-d13bcbef6f60",
+     "session_id": "d08ff012-d346-5325-a3f9-4ff2b3641407",
+     "occurred_at": "2023-04-25T14:15:30+00:00"
+    },
+    {
+     "order_id": "ord-016456",
+     "event_id": "cef3bd14-dad9-5725-becc-97328d96a4b4",
+     "value": 10013,
+     "currency": "HUF",
+     "customer_key": "0028e9bc-05cf-5caa-9e53-d6fc4d25ffb8",
+     "anonymous_id": "4e008568-19b6-5189-a907-5d46b1fe83cf",
+     "session_id": "c85675c5-25ae-54e2-8952-a99b7daa2c83",
+     "occurred_at": "2025-11-19T12:51:37+00:00"
+    }
+   ],
+   "identity_links": [
+    {
+     "anonymous_id": "983d0532-9083-508f-9644-d13bcbef6f60",
+     "customer_key": "0028e9bc-05cf-5caa-9e53-d6fc4d25ffb8",
+     "first_seen_at": "2023-04-25T14:15:30+00:00"
+    },
+    {
+     "anonymous_id": "4e008568-19b6-5189-a907-5d46b1fe83cf",
+     "customer_key": "0028e9bc-05cf-5caa-9e53-d6fc4d25ffb8",
+     "first_seen_at": "2025-11-19T12:51:37+00:00"
+    }
+   ]
+  },
+  {
+   "kind": "anonymous",
+   "raw_events": [
+    {
+     "event_id": "a8b55bdb-e8f5-5feb-9111-e68cb032d76c",
+     "event_name": "page_view",
+     "occurred_at": "2023-01-01T05:59:11+00:00",
+     "received_at": "2026-10-07T09:16:59.822742+00:00",
+     "session_id": "802dea92-4f1e-583e-9404-d7c06e543e55",
+     "anonymous_id": "bf0db0e8-6a2a-58ce-aa1b-bdaafda0b517",
+     "page_url": "https://bolt.example/",
+     "referrer": null,
+     "utm_source": null,
+     "utm_medium": null,
+     "payload": {}
+    },
+    {
+     "event_id": "ae135c08-d973-5507-8bda-49b1ae8bd5e3",
+     "event_name": "view_item",
+     "occurred_at": "2023-01-01T05:59:20+00:00",
+     "received_at": "2026-10-07T09:16:59.822742+00:00",
+     "session_id": "802dea92-4f1e-583e-9404-d7c06e543e55",
+     "anonymous_id": "bf0db0e8-6a2a-58ce-aa1b-bdaafda0b517",
+     "page_url": "https://bolt.example/termek/234",
+     "referrer": null,
+     "utm_source": null,
+     "utm_medium": null,
+     "payload": {
+      "item_id": "sku-234"
+     }
+    },
+    {
+     "event_id": "44fe2b51-ef60-561b-80c0-7b5033d9cbca",
+     "event_name": "view_item",
+     "occurred_at": "2023-01-01T06:00:17+00:00",
+     "received_at": "2026-10-07T09:16:59.822742+00:00",
+     "session_id": "802dea92-4f1e-583e-9404-d7c06e543e55",
+     "anonymous_id": "bf0db0e8-6a2a-58ce-aa1b-bdaafda0b517",
+     "page_url": "https://bolt.example/termek/216",
+     "referrer": null,
+     "utm_source": null,
+     "utm_medium": null,
+     "payload": {
+      "item_id": "sku-216"
+     }
+    },
+    {
+     "event_id": "70836455-cd89-5a64-8751-9dc2bf093830",
+     "event_name": "view_item",
+     "occurred_at": "2023-01-01T06:00:21+00:00",
+     "received_at": "2026-10-07T09:16:59.822742+00:00",
+     "session_id": "802dea92-4f1e-583e-9404-d7c06e543e55",
+     "anonymous_id": "bf0db0e8-6a2a-58ce-aa1b-bdaafda0b517",
+     "page_url": "https://bolt.example/termek/146",
+     "referrer": null,
+     "utm_source": null,
+     "utm_medium": null,
+     "payload": {
+      "item_id": "sku-146"
+     }
+    },
+    {
+     "event_id": "ffc96600-eaea-5328-b41c-41a3ef1e1211",
+     "event_name": "add_to_cart",
+     "occurred_at": "2023-01-01T06:02:04+00:00",
+     "received_at": "2026-10-07T09:16:59.822742+00:00",
+     "session_id": "802dea92-4f1e-583e-9404-d7c06e543e55",
+     "anonymous_id": "bf0db0e8-6a2a-58ce-aa1b-bdaafda0b517",
+     "page_url": "https://bolt.example/termek/146",
+     "referrer": null,
+     "utm_source": null,
+     "utm_medium": null,
+     "payload": {
+      "item_id": "sku-146"
+     }
+    },
+    {
+     "event_id": "0c7cf131-a4ac-5d8e-9d93-236d868fbef0",
+     "event_name": "begin_checkout",
+     "occurred_at": "2023-01-01T06:03:46+00:00",
+     "received_at": "2026-10-07T09:16:59.822742+00:00",
+     "session_id": "802dea92-4f1e-583e-9404-d7c06e543e55",
+     "anonymous_id": "bf0db0e8-6a2a-58ce-aa1b-bdaafda0b517",
+     "page_url": "https://bolt.example/penztar",
+     "referrer": null,
+     "utm_source": null,
+     "utm_medium": null,
+     "payload": {}
+    }
+   ],
+   "clean_events": [
+    {
+     "event_id": "a8b55bdb-e8f5-5feb-9111-e68cb032d76c",
+     "event_name": "page_view",
+     "occurred_at": "2023-01-01T05:59:11+00:00",
+     "session_id": "802dea92-4f1e-583e-9404-d7c06e543e55",
+     "anonymous_id": "bf0db0e8-6a2a-58ce-aa1b-bdaafda0b517",
+     "source_medium": "direct / none",
+     "person_id": "bf0db0e8-6a2a-58ce-aa1b-bdaafda0b517"
+    },
+    {
+     "event_id": "ae135c08-d973-5507-8bda-49b1ae8bd5e3",
+     "event_name": "view_item",
+     "occurred_at": "2023-01-01T05:59:20+00:00",
+     "session_id": "802dea92-4f1e-583e-9404-d7c06e543e55",
+     "anonymous_id": "bf0db0e8-6a2a-58ce-aa1b-bdaafda0b517",
+     "source_medium": "direct / none",
+     "person_id": "bf0db0e8-6a2a-58ce-aa1b-bdaafda0b517"
+    },
+    {
+     "event_id": "44fe2b51-ef60-561b-80c0-7b5033d9cbca",
+     "event_name": "view_item",
+     "occurred_at": "2023-01-01T06:00:17+00:00",
+     "session_id": "802dea92-4f1e-583e-9404-d7c06e543e55",
+     "anonymous_id": "bf0db0e8-6a2a-58ce-aa1b-bdaafda0b517",
+     "source_medium": "direct / none",
+     "person_id": "bf0db0e8-6a2a-58ce-aa1b-bdaafda0b517"
+    },
+    {
+     "event_id": "70836455-cd89-5a64-8751-9dc2bf093830",
+     "event_name": "view_item",
+     "occurred_at": "2023-01-01T06:00:21+00:00",
+     "session_id": "802dea92-4f1e-583e-9404-d7c06e543e55",
+     "anonymous_id": "bf0db0e8-6a2a-58ce-aa1b-bdaafda0b517",
+     "source_medium": "direct / none",
+     "person_id": "bf0db0e8-6a2a-58ce-aa1b-bdaafda0b517"
+    },
+    {
+     "event_id": "ffc96600-eaea-5328-b41c-41a3ef1e1211",
+     "event_name": "add_to_cart",
+     "occurred_at": "2023-01-01T06:02:04+00:00",
+     "session_id": "802dea92-4f1e-583e-9404-d7c06e543e55",
+     "anonymous_id": "bf0db0e8-6a2a-58ce-aa1b-bdaafda0b517",
+     "source_medium": "direct / none",
+     "person_id": "bf0db0e8-6a2a-58ce-aa1b-bdaafda0b517"
+    },
+    {
+     "event_id": "0c7cf131-a4ac-5d8e-9d93-236d868fbef0",
+     "event_name": "begin_checkout",
+     "occurred_at": "2023-01-01T06:03:46+00:00",
+     "session_id": "802dea92-4f1e-583e-9404-d7c06e543e55",
+     "anonymous_id": "bf0db0e8-6a2a-58ce-aa1b-bdaafda0b517",
+     "source_medium": "direct / none",
+     "person_id": "bf0db0e8-6a2a-58ce-aa1b-bdaafda0b517"
+    }
+   ],
+   "orders": [],
+   "identity_links": []
+  }
+ ]
+}

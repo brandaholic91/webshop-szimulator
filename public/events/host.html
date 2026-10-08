@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8">
+  <title>events: a tracker host-lapja</title>
+  <!--
+    Ez a lap a /muszerek/events oldal rejtett iframe-jeben
+    (sandbox="allow-scripts allow-same-origin") fut, es nincs lathato tartalma. A host.js elobb lecsereli a storage-ot es a
+    fetch-et, utana toltodik be a tracker.
+
+    A tracker.js az fp-collector api/static/landing/tracker.js fajljanak bajtra
+    azonos masolata. Forras-commit: df42625
+  -->
+</head>
+<body>
+  <script src="/events/host.js"></script>
+  <script src="/events/tracker.js"></script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{
+ "schema_version": 1,
+ "events": {
+  "generated": 5501362,
+  "withheld_no_consent": 1101004,
+  "sent_unique": 4400358,
+  "sent_duplicate": 44136,
+  "raw_events": 4400358,
+  "clean_events": 4400358
+ },
+ "sessions": {
+  "dgp": 1124610,
+  "pipeline": 898986
+ },
+ "orders": {
+  "dgp": 18268,
+  "pipeline": 14561
+ },
+ "revenue_huf": {
+  "dgp": 329012724,
+  "pipeline": 261682596
+ },
+ "identity": {
+  "customers_dgp": 29905,
+  "customers_consented_dgp": 25600,
+  "devices_dgp": 40477,
+  "devices_pipeline": 32364,
+  "identity_links": 10106,
+  "customers_identified": 9635,
+  "persons_after_stitching": 31893
+ }
+}
