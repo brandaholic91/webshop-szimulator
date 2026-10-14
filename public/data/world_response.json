@@ -1,25 +1,52 @@
 {
+ "segments": [
+  "alkalmi",
+  "arvadasz",
+  "markahu",
+  "nagykosaras"
+ ],
  "channels": [
   {
    "slug": "google_ads",
    "adstock_decay": 0.3,
    "half_saturation_huf": 20000.0,
    "shape": 1.5,
-   "reach_scale": 292.0
+   "reach_scale": 292.0,
+   "paid_sessions": 158949,
+   "audience": [
+    0.27957395139321417,
+    0.49060390439700785,
+    0.12403349502041536,
+    0.10578864918936262
+   ]
   },
   {
    "slug": "meta_ads",
    "adstock_decay": 0.6,
    "half_saturation_huf": 16000.0,
    "shape": 1.2,
-   "reach_scale": 214.0
+   "reach_scale": 214.0,
+   "paid_sessions": 147155,
+   "audience": [
+    0.9034487445210833,
+    0.020230369338452653,
+    0.04970948999354422,
+    0.026611396146919913
+   ]
   },
   {
    "slug": "arukereso",
    "adstock_decay": 0.15,
    "half_saturation_huf": 9000.0,
    "shape": 2.0,
-   "reach_scale": 134.0
+   "reach_scale": 134.0,
+   "paid_sessions": 60224,
+   "audience": [
+    0.04602816153028693,
+    0.8929994686503719,
+    0.03156548884165781,
+    0.029406880977683316
+   ]
   }
  ],
  "reference": {

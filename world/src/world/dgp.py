@@ -19,11 +19,14 @@ class Population:
     segment_idx: np.ndarray   # (n,) int, a WORLD.segments indexe
     propensity: np.ndarray    # (n,) log-odds eltolás
     aov_factor: np.ndarray    # (n,) kosárérték-szorzó
-    affinity: np.ndarray      # (n, 6) csatorna-affinitás, ALL_SLUGS sorrendben
-    churn_day: np.ndarray     # (n,) int, ettől a naptól nem kap érintést
+    affinity: np.ndarray      # (n, 6) csatorna-affinitás × aktivitás, ALL_SLUGS sorrendben
+    churn_day: np.ndarray     # (n,) int, ettől a naptól nem kap érintést; túlmehet az ablakon
+    arrival_day: np.ndarray   # (n,) int, ettől a naptól kaphat érintést (0 = az elején jelen van)
+    activity: np.ndarray      # (n,) aktivitás-szorzó; az affinity már tartalmazza
 
 
-def build_population(cfg: WorldConfig, gen: np.random.Generator) -> Population:
+def build_population(cfg: WorldConfig, gen: np.random.Generator,
+                     life: np.random.Generator) -> Population:
     """1. réteg — vásárló-populáció latens tulajdonságokkal.
 
     A latens SZEGMENS a `segments` műszer igazsága: a modellnek ezt kell majd
@@ -40,15 +43,23 @@ def build_population(cfg: WorldConfig, gen: np.random.Generator) -> Population:
     aov_factor = alap_aov * np.exp(gen.normal(0.0, 0.20, size=n))
 
     alap_aff = np.array([s.affinity for s in cfg.segments])[seg]        # (n, 6)
-    affinity = alap_aff * np.exp(gen.normal(0.0, 0.30, size=(n, 6)))
+    affinity = alap_aff * np.exp(gen.normal(0.0, cfg.affinity_sigma, size=(n, 6)))
 
-    # Az élettartam SAJÁT streamből jönne, de a churn a populáció tulajdonsága —
-    # itt a population streamből húzzuk, a lifetime stream a CLV-nek marad
-    # fenntartva (27. döntés (a) pont).
+    # Az élet a `lifetime` streamből jön (26. és 58. döntés): érkezés, élettartam,
+    # aktivitás, EBBEN a sorrendben. A stream nincs a VALTOZO listán, tehát minden
+    # replikában és minden ellentényes világban ugyanazok a vevők érkeznek és tűnnek el.
+    # Az érkezés szándékosan nem függ a hirdetéstől: különben a nullázott világban más
+    # vevők volnának, és az inkrementalitás definíciója változna.
+    kezdo = life.random(n) < cfg.initial_share
+    arrival_day = np.where(kezdo, 0, life.integers(1, cfg.n_days, size=n))
     hazard = np.array([s.churn_hazard_daily for s in cfg.segments])[seg]
-    churn_day = gen.exponential(1.0 / hazard).astype(int)
+    # + 1: az érkezése napján mindenki él
+    churn_day = arrival_day + 1 + life.exponential(1.0 / hazard).astype(int)
+    # kevesebb, aktívabb vevőre koncentrálja a sessionöket: ettől lesz visszatérő vásárló
+    activity = np.exp(life.normal(0.0, cfg.activity_sigma, size=n))
 
-    return Population(seg, propensity, aov_factor, affinity, churn_day)
+    return Population(seg, propensity, aov_factor, affinity * activity[:, None],
+                      churn_day, arrival_day, activity)
 
 
 def seasonality(cfg: WorldConfig) -> np.ndarray:
@@ -84,26 +95,30 @@ def seasonality(cfg: WorldConfig) -> np.ndarray:
 def build_spend(cfg: WorldConfig, gen: np.random.Generator) -> np.ndarray:
     """2. réteg — napi költés a három fizetett csatornán, Ft.
 
-    Havi budget-lépcsők (a hirdető havonta állít), napi zaj, és ugyanaz a
-    szezonális nyomás, ami a keresletet mozgatja — ettől lesz a költés és a
-    bevétel KORRELÁLT, ami az MMM valódi nehézsége.
+    Havi budget-lépcsők CSATORNÁNKÉNT külön húzva (a három hirdetési fiókot nem egy
+    kéz állítja), napi zaj, kézzel felsorolt kampányszünetek, és ugyanaz a szezonális
+    nyomás, ami a keresletet mozgatja. A szezon miatt a költés és a bevétel KORRELÁLT:
+    ez a naiv regresszió csapdája. A csatornák egymástól viszont függetlenül mozognak,
+    különben a hatásuk nem volna szétválasztható (58. döntés).
     """
     napok = cfg.days
     n = len(napok)
     szez = seasonality(cfg)
 
-    # havi budget-szorzó: minden hónapra egy húzás, a hónap minden napjára ugyanaz
+    # havi budget-szorzó: hónaponként és csatornánként egy húzás, a hónap minden napjára ugyanaz
     honap_kulcs = np.array([d.year * 12 + d.month for d in napok])
-    egyedi = np.unique(honap_kulcs)
-    havi = gen.lognormal(0.0, 0.12, size=len(egyedi))
-    havi_map = dict(zip(egyedi.tolist(), havi.tolist()))
-    havi_szorzo = np.array([havi_map[k] for k in honap_kulcs])
+    egyedi, honap_idx = np.unique(honap_kulcs, return_inverse=True)
+    havi = gen.lognormal(0.0, cfg.spend_monthly_sigma, size=(len(egyedi), len(PAID_SLUGS)))
+    havi_szorzo = havi[honap_idx]                                   # (n, 3)
 
     ki = np.zeros((n, len(PAID_SLUGS)))
     for j, slug in enumerate(PAID_SLUGS):
         ch = cfg.channel(slug)
         napi_zaj = gen.lognormal(0.0, 0.10, size=n)
-        ki[:, j] = ch.daily_base_huf * havi_szorzo * szez * napi_zaj
+        ki[:, j] = ch.daily_base_huf * havi_szorzo[:, j] * szez * napi_zaj
+    for p in cfg.pauses:
+        szunet = np.array([p.first <= d <= p.last for d in napok])
+        ki[szunet, PAID_SLUGS.index(p.slug)] = 0.0
     return np.round(ki, 0)
 
 
@@ -168,7 +183,7 @@ def run(cfg: WorldConfig, gen: dict | None = None) -> World:
     napok = cfg.days
     n = cfg.n_days
 
-    pop = build_population(cfg, gen["population"])
+    pop = build_population(cfg, gen["population"], gen["lifetime"])
     spend = build_spend(cfg, gen["spend"])
     szez = seasonality(cfg)
 
@@ -193,12 +208,12 @@ def run(cfg: WorldConfig, gen: dict | None = None) -> World:
             k = int(sessions[d, c])
             if k == 0:
                 continue
-            elo_maszk = pop.churn_day > d
+            elo_maszk = (pop.arrival_day <= d) & (pop.churn_day > d)
             suly = np.where(elo_maszk, suly_oszlop, 0.0)
             osszeg = suly.sum()
             if osszeg <= 0:
                 continue
-            valasztott = tg.choice(cfg.n_customers, size=k, p=suly / osszeg)
+            valasztott = _sorsol(tg, suly / osszeg, k)
             t_cust.append(valasztott)
             t_day.append(np.full(k, d))
             t_chan.append(np.full(k, c))
@@ -246,19 +261,32 @@ def run(cfg: WorldConfig, gen: dict | None = None) -> World:
     return World(napok, spend, megfigyelt, touches, orders, pop)
 
 
+def _sorsol(gen: np.random.Generator, p: np.ndarray, k: int) -> np.ndarray:
+    """k index a p súlyok szerint, visszatevéssel. Bitre ugyanazt adja, és a streamet
+    is ugyanott hagyja, mint a gen.choice(len(p), size=k, p=p): kumulált súly, k
+    egyenletes szám, bináris keresés. Ami kimarad, az a choice hívásonkénti
+    súly-ellenőrzése; a run() naponta és csatornánként hívja, ott ez volt az idő fele.
+    Az egyezést a tests/test_dgp.py őrzi (egy numpy-frissítés után is)."""
+    cdf = np.cumsum(p)
+    cdf /= cdf[-1]
+    return cdf.searchsorted(gen.random(k), side="right")
+
+
 def _journey_strength(cfg: WorldConfig, touches: dict) -> np.ndarray:
     """Hány (súlyozott) érintés érte a vásárlót az elmúlt lookback_days napban,
-    az AKTUÁLIS érintést is beleértve. A journey ereje, nem a session-é."""
-    n = len(touches["day"])
-    ki = np.zeros(n)
-    # a touches nap szerint rendezett; vásárlónként csúszó ablak
-    utolsok: dict[int, list[int]] = {}
-    for i in range(n):
-        c = int(touches["customer"][i])
-        d = int(touches["day"][i])
-        sor = utolsok.setdefault(c, [])
-        while sor and sor[0] < d - cfg.lookback_days:
-            sor.pop(0)
-        sor.append(d)
-        ki[i] = float(np.sqrt(len(sor)))   # csökkenő hozadék a journey hosszán is
+    az AKTUÁLIS érintést is beleértve. A journey ereje, nem a session-é.
+
+    Nem sorsol. Vektoros: az érintések vásárló szerint rendezve (azon belül marad a
+    nap szerinti sorrend), és minden érintésnél bináris keresés adja az ablak elejét;
+    a darabszám a két sorszám különbsége. A soronkénti, kézzel követhető alak a
+    tests/test_dgp.py-ban áll referenciának."""
+    c, d = touches["customer"].astype(np.int64), touches["day"].astype(np.int64)
+    rend = np.argsort(c, kind="stable")
+    # egy kulcs = (vásárló, nap); M elég nagy, hogy az ablak eleje ne lógjon át az
+    # előző vásárló kulcsai közé
+    M = cfg.n_days + cfg.lookback_days + 1
+    kulcs = c[rend] * M + d[rend] + cfg.lookback_days
+    elso = np.searchsorted(kulcs, kulcs - cfg.lookback_days, side="left")
+    ki = np.empty(len(c))
+    ki[rend] = np.sqrt(np.arange(len(c)) - elso + 1)   # csökkenő hozadék a journey hosszán is
     return ki

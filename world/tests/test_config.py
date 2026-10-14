@@ -46,3 +46,18 @@ def test_csak_fizetett_csatorna_fog_el_es_a_savok_elfernek():
         assert 0.0 <= c.capture_max <= 1.0, c.slug
     # a három sáv egymás után áll a [0, 1) intervallumban
     assert sum(c.capture_max for c in WORLD.channels) <= 1.0
+
+
+def test_a_kampanyszunetek_ervenyesek_es_nem_fedik_egymast():
+    """Kézzel felsorolt szünetek (58. döntés): fizetett csatorna, az ablakon belül, 2–4 hét,
+    és soha nem egy időben, különben a csatornák hatása megint nem volna szétválasztható.
+    Az ablak első és utolsó napja nem lehet szünet: előtte és utána is kell költéses nap."""
+    assert 3 <= len(WORLD.pauses) <= 6
+    for p in WORLD.pauses:
+        assert p.slug in PAID_SLUGS, p
+        assert WORLD.start < p.first <= p.last < WORLD.end, p
+        assert 14 <= (p.last - p.first).days + 1 <= 28, p
+    for i, a in enumerate(WORLD.pauses):
+        for b in WORLD.pauses[i + 1:]:
+            assert a.last < b.first or b.last < a.first, (a, b)
+    assert {p.slug for p in WORLD.pauses} == set(PAID_SLUGS)   # mindegyiknek van legalább egy

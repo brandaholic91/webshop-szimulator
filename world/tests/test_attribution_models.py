@@ -2,8 +2,10 @@ from pathlib import Path as FsPath
 
 import pytest
 
+import world.customers
 import world.journeys
 import world.models.attribution
+import world.models.segments
 from world.journeys import Path
 from world.models.attribution import last_click, linear, markov, removal_effects, time_decay
 
@@ -69,7 +71,8 @@ def test_minden_modell_a_teljes_bevetelt_osztja_szet(modell):
     assert sum(modell(utak).values()) == pytest.approx(55_000)
 
 
-@pytest.mark.parametrize("modul", [world.journeys, world.models.attribution])
+@pytest.mark.parametrize("modul", [world.journeys, world.models.attribution,
+                                   world.customers, world.models.segments])
 def test_a_modell_oldal_nem_hivatkozik_az_igazsagot_olvaso_modulra(modul):
     """1. nem-tárgyalható szabály. Ha egy modell látja az igazságot, az eredmény
     csak jobb lesz tőle, és nem derül ki. A két szó a forrásban sehol nem állhat:

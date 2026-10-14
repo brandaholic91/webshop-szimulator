@@ -6,11 +6,14 @@ export interface ResponseChannel {
   half_saturation_huf: number;
   shape: number;
   reach_scale: number;
+  paid_sessions: number;   // a hirdetes sajat latogatasai a bolt futasaban
+  audience: number[];      // a latogatasok szegmens-aranya, a `segments` sorrendjeben
 }
 
 export interface WorldData {
   spend: { start: string; channels: string[]; daily_huf: number[][] };
   response: {
+    segments: string[];
     channels: ResponseChannel[];
     reference: Record<string, { spend_huf: number[]; saturated: number[] }>;
   };

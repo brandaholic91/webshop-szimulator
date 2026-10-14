@@ -20,7 +20,7 @@ import numpy as np
 from .config import PAID_SLUGS, WORLD
 from .dgp import run
 from .rng import replica_streams
-from .truth import OUT, REPLICATES
+from .truth import OUT, REPLICATES, WORKERS
 
 def replica(rep: int) -> dict[str, dict[str, float]]:
     """Egy replika: csatornánként inkrementális bevétel, ROAS és bevétel-arány."""
@@ -40,7 +40,7 @@ def replica(rep: int) -> dict[str, dict[str, float]]:
 
 def main() -> None:
     print(f"{REPLICATES} replika, mindegyik 1 teljes + 3 ellentényes világ…")
-    with Pool() as pool:
+    with Pool(WORKERS) as pool:
         replikak = pool.map(replica, range(1, REPLICATES + 1))
 
     def szoras(slug: str, kulcs: str) -> float:

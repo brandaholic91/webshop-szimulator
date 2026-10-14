@@ -1,10 +1,15 @@
+from dataclasses import fields
+
 import numpy as np
 import pytest
 
 from world.compare import load_truth
 from world.config import WORLD, PAID_SLUGS
-from world.dgp import run
-from world.truth import REPLICATES, build_truth, incrementality, mean_incrementality
+from world.dgp import build_population, run
+from world.emit import customer_key
+from world.rng import replica_streams, streams
+from world.truth import (REPLICATES, build_truth, channel_audience, incrementality,
+                         mean_incrementality, segment_assignment)
 
 
 @pytest.fixture(scope="module")
@@ -18,9 +23,9 @@ def test_a_populacio_bitre_azonos_a_nullazott_vilagban():
     és semmi nem árulná el, mert az eredmény csak 'más' lenne, nem hibás."""
     teljes = run(WORLD)
     nelkule = run(WORLD.zero_spend("meta_ads"))
-    assert np.array_equal(teljes.population.propensity, nelkule.population.propensity)
-    assert np.array_equal(teljes.population.segment_idx, nelkule.population.segment_idx)
-    assert np.array_equal(teljes.population.churn_day, nelkule.population.churn_day)
+    for mezo in fields(teljes.population):
+        assert np.array_equal(getattr(teljes.population, mezo.name),
+                              getattr(nelkule.population, mezo.name)), mezo.name
 
 
 def test_minden_fizetett_csatornara_van_igazsag(inc):
@@ -62,12 +67,13 @@ def test_a_truth_json_semaja():
     assert truth["schema_version"] == 1
     assert set(truth) >= {
         "schema_version", "seed", "adstock", "saturation",
-        "base_demand", "segments", "incrementality",
+        "base_demand", "segments", "segment_assignment", "incrementality",
     }
     # A 27. döntés (a): a CLV és az uplift MÉG NINCS benne.
     assert "clv" not in truth and "uplift" not in truth
+    assert len(truth["segment_assignment"]) == WORLD.n_customers
     # A megjelenítési dict nem tartalmaz vásárló-szintű latenst.
-    assert "segment_idx" not in megjelenites
+    assert "segment_idx" not in megjelenites and "segment_assignment" not in megjelenites
 
 
 def test_az_elfogas_nem_mozditja_az_igazsagot():
@@ -79,3 +85,41 @@ def test_az_elfogas_nem_mozditja_az_igazsagot():
     truth = load_truth()
     assert truth["replicates"] == REPLICATES
     assert build_truth(WORLD)[0] == truth
+
+
+def test_a_szegmens_kiosztas_a_populacio_cimkeje_customer_key_szerint():
+    """57. döntés: a segments igazsága vásárlónként egy slug, a pipeline kulcsával."""
+    kiosztas = segment_assignment(WORLD)
+    pop = build_population(WORLD, streams(WORLD.seed)["population"], streams(WORLD.seed)["lifetime"])
+    slugok = [s.slug for s in WORLD.segments]
+    assert len(kiosztas) == WORLD.n_customers
+    assert set(kiosztas.values()) == set(slugok)
+    for i in (0, 1, 12_345, WORLD.n_customers - 1):
+        assert kiosztas[customer_key(WORLD.seed, i)] == slugok[pop.segment_idx[i]]
+
+
+def test_a_nepesseg_minden_replikaban_ugyanaz():
+    """A population és a lifetime stream nincs a VALTOZO-ban (rng.py): a 40 újrajátszás
+    ugyanazt a vevőkört játssza újra, ugyanazzal az érkezéssel és lemorzsolódással."""
+    s, r = streams(WORLD.seed), replica_streams(WORLD.seed, 7)
+    alap = build_population(WORLD, s["population"], s["lifetime"])
+    replika = build_population(WORLD, r["population"], r["lifetime"])
+    for mezo in fields(alap):
+        assert np.array_equal(getattr(alap, mezo.name), getattr(replika, mezo.name)), mezo.name
+
+
+def test_a_csatorna_kozonsege_a_sajat_sessionjeibol_jon():
+    """A lap ebből magyarázza a csatornák eltérő megtérülését: a session-szám a
+    csatorna saját (elfogás előtti) sessionje, a közönség ezek szegmens-aránya."""
+    w = run(WORLD)
+    ki = channel_audience(WORLD, w)
+    assert list(ki) == list(PAID_SLUGS)
+    for j, s in enumerate(PAID_SLUGS):
+        assert ki[s]["paid_sessions"] == int((w.touches["base_channel"] == j).sum()) > 0
+        assert len(ki[s]["audience"]) == len(WORLD.segments)
+        assert sum(ki[s]["audience"]) == pytest.approx(1.0)
+    # Az affinitás a közönségben is látszik: minden csatornát az a típus uralja,
+    # amelyiknek a legnagyobb rá az affinitása (a cfg.segments sorrendjében).
+    for j, s in enumerate(PAID_SLUGS):
+        kedvenc = int(np.argmax([seg.affinity[j] * seg.share for seg in WORLD.segments]))
+        assert int(np.argmax(ki[s]["audience"])) == kedvenc, s

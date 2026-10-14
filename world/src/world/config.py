@@ -37,8 +37,17 @@ class Segment:
     share: float
     propensity: float          # log-odds eltolás a konverzióban
     aov_factor: float          # a kosárérték medián-szorzója
-    churn_hazard_daily: float  # napi lemorzsolódási hazard
+    churn_hazard_daily: float  # napi lemorzsolódási hazard az érkezéstől; 1/hazard az átlagos élettartam napban
     affinity: tuple[float, ...]  # 6 súly, ALL_SLUGS sorrendjében
+
+
+@dataclass(frozen=True)
+class Pause:
+    """Kampányszünet: ezeken a napokon a csatorna költése nulla. Kézzel felsorolt, nem
+    sorsolt (58. döntés): a lap rá tud mutatni, és az MMM-nek ez a legtisztább jel."""
+    slug: str     # fizetett csatorna
+    first: date   # az első nap költés nélkül
+    last: date    # az utolsó (ő is szünet)
 
 
 @dataclass(frozen=True)
@@ -60,6 +69,11 @@ class WorldConfig:
     lookback_days: int                  # meddig számít egy érintés a journey-ben
     aov_median_huf: float
     aov_sigma: float
+    spend_monthly_sigma: float          # a havi budget-szorzó szórása (log), csatornánként külön húzva
+    pauses: tuple[Pause, ...]           # kampányszünetek
+    initial_share: float                # a vevők ekkora része a 0. napon már jelen van
+    activity_sigma: float               # a vevőnkénti aktivitás-szorzó szórása (log)
+    affinity_sigma: float               # a vevőnkénti csatorna-affinitás zaja (log)
 
     @property
     def n_days(self) -> int:
@@ -101,10 +115,10 @@ WORLD = WorldConfig(
         Channel("email",    "unpaid", 0.0, 0.0, 0.0, 1.0, 0.15, 0.0),
     ),
     segments=(
-        Segment("alkalmi",     0.45, -0.35, 0.85, 0.00010, (1.2, 1.3, 0.9, 1.0, 0.6, 0.4)),
-        Segment("arvadasz",    0.25, -0.10, 0.80, 0.00008, (1.1, 0.8, 2.2, 1.0, 0.7, 0.6)),
-        Segment("markahu",     0.20,  0.55, 1.15, 0.00005, (0.7, 0.9, 0.5, 1.2, 1.8, 2.0)),
-        Segment("nagykosaras", 0.10,  0.20, 2.10, 0.00007, (1.0, 1.0, 0.8, 1.1, 1.2, 1.0)),
+        Segment("alkalmi",     0.45, -0.35, 0.85, 1 / 1100, (0.5, 4.0, 0.15, 0.8, 0.5, 0.3)),
+        Segment("arvadasz",    0.25, -0.10, 0.80, 1 / 1200, (1.5, 0.15, 5.0, 0.7, 0.5, 0.4)),
+        Segment("markahu",     0.20,  0.55, 1.15, 1 / 2000, (0.4, 0.4, 0.2, 0.8, 2.5, 4.0)),
+        Segment("nagykosaras", 0.10,  0.20, 2.10, 1 / 1500, (0.8, 0.5, 0.4, 3.5, 0.8, 0.5)),
     ),
     n_customers=30_000,
     base_sessions_start=569.0,
@@ -113,11 +127,22 @@ WORLD = WorldConfig(
     yearly_amplitude=0.16,
     q4_boost=1.22,
     black_friday_boost=2.60,
-    conversion_intercept=-5.136,
+    conversion_intercept=-5.73,
     touch_effect=0.42,
     lookback_days=30,
-    aov_median_huf=13_600.0,
+    aov_median_huf=12_300.0,
     aov_sigma=0.55,
+    spend_monthly_sigma=0.20,
+    pauses=(
+        Pause("google_ads", date(2024, 2, 5), date(2024, 2, 25)),
+        Pause("google_ads", date(2025, 6, 2), date(2025, 6, 15)),
+        Pause("meta_ads",   date(2023, 6, 5), date(2023, 7, 2)),
+        Pause("meta_ads",   date(2025, 3, 3), date(2025, 3, 16)),
+        Pause("arukereso",  date(2024, 8, 5), date(2024, 8, 25)),
+    ),
+    initial_share=0.35,
+    activity_sigma=1.00,
+    affinity_sigma=0.20,
 )
 
 

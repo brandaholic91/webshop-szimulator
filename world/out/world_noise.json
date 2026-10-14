@@ -3,19 +3,19 @@
  "replicates": 40,
  "sd": {
   "google_ads": {
-   "incremental_revenue_huf": 2563017,
-   "true_roas": 0.1554,
-   "share_of_revenue": 0.00738
+   "incremental_revenue_huf": 2939950,
+   "true_roas": 0.1826,
+   "share_of_revenue": 0.00779
   },
   "meta_ads": {
-   "incremental_revenue_huf": 2759153,
-   "true_roas": 0.2126,
-   "share_of_revenue": 0.00784
+   "incremental_revenue_huf": 4100968,
+   "true_roas": 0.3492,
+   "share_of_revenue": 0.01091
   },
   "arukereso": {
-   "incremental_revenue_huf": 2592396,
-   "true_roas": 0.3549,
-   "share_of_revenue": 0.00772
+   "incremental_revenue_huf": 4053915,
+   "true_roas": 0.5612,
+   "share_of_revenue": 0.01104
   }
  }
 }

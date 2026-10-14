@@ -52,6 +52,13 @@ const Folds: React.FC<{ data: EventsData }> = ({ data }) => {
           aki nem adott consentet, annak a vásárlása a mérés számára nem létezik.
         </p>
         <p className="mt-3">
+          A consent eszközönként dől el, a csatornától és a vásárlótól függetlenül, ezért a három
+          arány közel esik egymáshoz. Hogy nem pontosan egyezik, az a véletlen: a bevétel nagy
+          részét kevés visszatérő vásárló hozza, ezért a rendelések és a bevétel lefedettsége azon
+          is múlik, az ő eszközeik közül melyik adott consentet. A sessionök sokkal több ember
+          között oszlanak el, ott ez a véletlen kisebb.
+        </p>
+        <p className="mt-3">
           Ezért nem szabad az analitika bevételét a könyvelés bevételével egyenlőnek venni. Egy
           valódi boltban a rendelés a webshop adatbázisából is megvan, consenttől függetlenül; a
           tracker abból csak azt a részt látja, amihez hozzájárulás tartozik. Minden modell, ami

@@ -1,32 +1,32 @@
 {
  "schema_version": 1,
  "events": {
-  "generated": 5501362,
-  "withheld_no_consent": 1101004,
-  "sent_unique": 4400358,
-  "sent_duplicate": 44136,
-  "raw_events": 4400358,
-  "clean_events": 4400358
+  "generated": 5434568,
+  "withheld_no_consent": 1136076,
+  "sent_unique": 4298492,
+  "sent_duplicate": 42925,
+  "raw_events": 4298492,
+  "clean_events": 4298492
  },
  "sessions": {
-  "dgp": 1124610,
-  "pipeline": 898986
+  "dgp": 1108658,
+  "pipeline": 876943
  },
  "orders": {
-  "dgp": 18268,
-  "pipeline": 14561
+  "dgp": 20182,
+  "pipeline": 15825
  },
  "revenue_huf": {
-  "dgp": 329012724,
-  "pipeline": 261682596
+  "dgp": 358508072,
+  "pipeline": 276416388
  },
  "identity": {
-  "customers_dgp": 29905,
-  "customers_consented_dgp": 25600,
-  "devices_dgp": 40477,
-  "devices_pipeline": 32364,
-  "identity_links": 10106,
-  "customers_identified": 9635,
-  "persons_after_stitching": 31893
+  "customers_dgp": 28475,
+  "customers_consented_dgp": 24190,
+  "devices_dgp": 37399,
+  "devices_pipeline": 29890,
+  "identity_links": 5783,
+  "customers_identified": 5423,
+  "persons_after_stitching": 29530
  }
 }

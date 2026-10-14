@@ -9,6 +9,13 @@ import { useWorldData } from './useWorldData';
 import { PAID, channelColor } from './channels';
 import { adstock, saturate } from './response';
 import { ft, mFt } from './format';
+import { channelValues, cheapNotBest } from './value';
+
+// A tabla cellai: mobilon (max-md) az ot oszlopnak 341 px-en kell elfernie.
+const TH = 't-label-sm border-b border-border-strong py-2 pr-4 font-medium text-on-surface-subtle ' +
+  'max-md:pr-1.5 max-md:tracking-normal max-md:last:pr-0';
+const TD = 'border-b border-border py-2 pr-4 max-md:pr-1.5 max-md:last:pr-0';
+const NUM = `${TD} whitespace-nowrap text-right`;
 
 const World: React.FC = () => {
   const { data, error } = useWorldData();
@@ -93,6 +100,10 @@ const World: React.FC = () => {
   const teljesBevetel = osszeg(data.outcome.weekly_revenue_huf);
   const teljesKoltes = osszeg(data.spend.daily_huf.flat());
   const hirdetesHozta = osszeg(PAID.map(c => data.incrementality.counterfactual[c.slug].incremental_revenue_huf));
+
+  // A megterules ket tenyezore bontva: a latogatas ara es hozama.
+  const ertekek = channelValues(data);
+  const olcso = cheapNotBest(ertekek);
 
   return (
     <>
@@ -197,6 +208,71 @@ const World: React.FC = () => {
               {Math.round((1 - hirdetesHozta / teljesBevetel) * 100)}%-a hirdetés nélkül is megjönne.
               Ezért a teljes bevétel és a költés hányadosa
               ({(teljesBevetel / teljesKoltes).toFixed(2)}) nem a hirdetés megtérülése.
+            </p>
+          </div>
+        </div>
+      </Page>
+
+      {/* ---- miert mas a harom csatorna megterulese ---- */}
+      <Page className="pb-10">
+        <div className="g12">
+          <div className="c3 pr-8">
+            <div className="t-label-sm text-on-surface-subtle">Miért más a megtérülésük?</div>
+          </div>
+          <div className="c9">
+            <p className="t-body prose-col text-on-surface-muted">
+              A ROAS két szám hányadosa: mennyi bevételt hoz egy hirdetéses látogatás, és mennyibe
+              kerül. Az árát a lenti lánc dönti el (lecsengés és szaturáció). A hozamát az, hogy
+              kiket hoz a csatorna: a bolt négy vásárlótípusa más eséllyel vásárol, más
+              kosárértékkel, és mindegyik más csatornán jár.
+            </p>
+            {olcso && (
+              <p className="t-body prose-col mt-3 tabular-nums text-on-surface-muted">
+                A(z) {olcso.cheap.title} látogatása a legolcsóbb ({ft(olcso.cheap.costPerSession)} Ft),
+                mégsem ez térül meg a legjobban: a látogatóinak{' '}
+                {Math.round(olcso.cheap.topSegment.share * 100)}%-a{' '}
+                {olcso.cheap.topSegment.title.toLowerCase()} vásárló, és egy látogatása{' '}
+                {ft(olcso.cheap.valuePerSession)} Ft bevételt hoz. A(z) {olcso.best.title} látogatása
+                drágább ({ft(olcso.best.costPerSession)} Ft), de {ft(olcso.best.valuePerSession)} Ft-ot
+                hoz. Ugyanez a különbség választja szét a vásárlótípusokat a Szegmensek (01.5)
+                oldalon: a típusok abban különböznek leginkább, honnan érkeznek.
+              </p>
+            )}
+            <table className="t-body mt-6 w-full tabular-nums">
+              <thead>
+                <tr>
+                  <th scope="col" className={`${TH} text-left`}>Csatorna</th>
+                  <th scope="col" aria-label="Egy látogatás ára" className={`${TH} text-right`}>
+                    <span className="max-md:hidden">1 látogatás ára</span><span className="md:hidden">Ár</span>
+                  </th>
+                  <th scope="col" aria-label="Egy látogatás hozama" className={`${TH} text-right`}>
+                    <span className="max-md:hidden">1 látogatás hozama</span><span className="md:hidden">Hozam</span>
+                  </th>
+                  <th scope="col" className={`${TH} text-right`}>ROAS</th>
+                  <th scope="col" aria-label="A látogatók legnagyobb típusa" className={`${TH} text-right`}>
+                    <span className="max-md:hidden">Legtöbb látogatója</span><span className="md:hidden">Közönség</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {ertekek.map(r => (
+                  <tr key={r.slug}>
+                    <th scope="row" className={`${TD} text-left font-normal`}>{r.title}</th>
+                    <td className={NUM}>{ft(r.costPerSession)} Ft</td>
+                    <td className={NUM}>{ft(r.valuePerSession)} Ft</td>
+                    <td className={NUM}>{r.roas.toFixed(2)}</td>
+                    <td className={`${TD} text-right`}>
+                      {r.topSegment.title} {Math.round(r.topSegment.share * 100)}%
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="t-body prose-col mt-3 text-on-surface-subtle">
+              A látogatás a hirdetés saját látogatása; az elfogott organikus és közvetlen
+              látogató nem számít bele, mert hirdetés nélkül is megjött volna. A hozam a csatorna
+              teljes inkrementális bevétele elosztva ezzel a látogatásszámmal, tehát a későbbi,
+              más csatornán történt vásárlásokat is tartalmazza.
             </p>
           </div>
         </div>
@@ -313,7 +389,8 @@ const World: React.FC = () => {
           <p>
             A bolt nem létezik: egy seedelt generátor állítja elő, vásárló-szinten. Harmincezer
             vásárló kap latens tulajdonságokat — vásárlási hajlandóságot, csatorna-affinitást,
-            kosárérték-szorzót, élettartam-hazardot —, és ebből származik minden aggregátum. A napi
+            aktivitást, kosárérték-szorzót, érkezési napot, élettartam-hazardot —, és ebből
+            származik minden aggregátum. A napi
             költés adstockon és szaturáción megy át, abból lesz elérés, abból journey, abból
             konverzió, abból rendelés.
           </p>

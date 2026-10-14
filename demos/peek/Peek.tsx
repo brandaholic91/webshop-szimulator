@@ -259,6 +259,12 @@ const Peek: React.FC = () => {
               Itt a B ág <strong>tényleg jobb</strong>. A kérdés megfordul: a tesztek hányada veszi
               észre? A forgalom és a tesztidő a fenti csúszkákról jön.
             </p>
+            <p className="t-body prose-col mt-3 text-on-surface-muted">
+              A szimulált erő ritkán egyezik pontosan a képlet szerintivel: {int(RUNS)} futásból
+              számol, és minden futásban más a véletlen. Az „Új {int(RUNS)} futás” gombbal ez
+              kipróbálható; sok futásnál a kettő egybeesik. Ugyanezért tér el fent a téves
+              riasztás a megengedettől akkor is, ha csak a végén nézel rá.
+            </p>
           </div>
 
           <div className="c9 max-md:mt-8">

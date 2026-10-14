@@ -251,6 +251,41 @@ export function modelErrors(data: AttributionData, lookback: number): ModelError
   }));
 }
 
+// ---- a harom sorrend-alapu modell egyuttallasa, es amiben a Markov mas ----
+
+const POSITIONAL: readonly Model[] = ['last_click', 'linear', 'time_decay'];
+
+// A harom sorrend-alapu modell legnagyobb kulonbsege egy fizetett csatornan, szazalekpontban.
+export function positionalSpreadPp(data: AttributionData, lookback: number): number {
+  const d = windowData(data, lookback);
+  let max = 0;
+  for (const slug of data.paid) {
+    const i = data.channels.indexOf(slug);
+    const shares = POSITIONAL.map(m => d.share[m][i]);
+    max = Math.max(max, Math.max(...shares) - Math.min(...shares));
+  }
+  return max * 100;
+}
+
+export interface MarkovShift {
+  title: string;
+  others: number;   // a harom sorrend-alapu modell atlagos aranya
+  markov: number;
+}
+
+// Mind a hat csatornabol az, amelyiket a Markov a legtobbel emeli, es az, amelyiket a
+// legtobbel csokkenti a masik harom modell atlagahoz kepest.
+export function markovShift(data: AttributionData, lookback: number): { up: MarkovShift; down: MarkovShift } {
+  const d = windowData(data, lookback);
+  const rows = data.channels.map((slug, i) => ({
+    title: title(slug),
+    others: POSITIONAL.reduce((s, m) => s + d.share[m][i], 0) / POSITIONAL.length,
+    markov: d.share.markov[i],
+  }));
+  const by = [...rows].sort((a, b) => (b.markov - b.others) - (a.markov - a.others));
+  return { up: by[0], down: by[by.length - 1] };
+}
+
 // ---- szamformatum: magyar, tizedesvesszovel ----
 
 const intFmt = new Intl.NumberFormat('hu-HU', { maximumFractionDigits: 0 });

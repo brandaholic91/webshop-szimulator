@@ -20,8 +20,8 @@ describe('shopBaseline', () => {
   // vilagot ujrageneralod, ez a teszt elbukik — akkor ezt a ket erteket ird at.
   it('a publikalt vilagon a bolt ismert szamait adja', () => {
     const b = shopBaseline(published);
-    expect(b.sessionsPerDay).toBe(1026);
-    expect(Math.abs(b.baseRate - 0.016244)).toBeLessThan(1e-6);
+    expect(b.sessionsPerDay).toBe(1012);
+    expect(Math.abs(b.baseRate - 0.018204)).toBeLessThan(1e-6);
   });
 
   it('hianyzo mezonel hibat dob, nem NaN-t ad', () => {

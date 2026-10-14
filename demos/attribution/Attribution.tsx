@@ -5,8 +5,8 @@ import Fold from '../../components/Fold';
 import ModelBars from './ModelBars';
 import { useAttributionData } from './useAttributionData';
 import {
-  MODEL_LABEL, MODEL_SHORT, chartGroups, chartLabel, ft, int, modelErrors, pct, pp, roasFmt, shareMax,
-  signedPp, tableRows, windowData,
+  MODEL_LABEL, MODEL_SHORT, chartGroups, chartLabel, ft, int, markovShift, modelErrors, pct,
+  positionalSpreadPp, pp, roasFmt, shareMax, signedPp, tableRows, windowData,
 } from './view';
 import type { AttributionData } from './view';
 
@@ -225,8 +225,10 @@ const Folds: React.FC<{ data: AttributionData }> = ({ data }) => {
           választja szét.
         </p>
         <p className="mt-3">
-          Ebben a világban nincs célzás és nincs igény-alapú vásárlás. Az eredmény erre a
-          világra szól.
+          Ebben a világban nincs célzás és nincs igény-alapú vásárlás. A csatornák közönsége
+          vásárlótípusban különbözik, de a vásárlás esélye nem függ attól, melyik csatornáról jött
+          a látogató: a vásárló hajlandóságán, az előző hetek látogatásainak számán és a szezonon
+          múlik. Az eredmény erre a világra szól.
         </p>
       </Fold>
 
@@ -289,6 +291,7 @@ const Attribution: React.FC = () => {
   const groups = chartGroups(data, lookback);
   const d = windowData(data, lookback);
   const errors = modelErrors(data, lookback).map(e => e.errorPp);
+  const shift = markovShift(data, lookback);
 
   return (
     <>
@@ -342,6 +345,23 @@ const Attribution: React.FC = () => {
               A {lookback} napos ablakban a négy modell átlagos eltérése az igazságtól{' '}
               {pp(Math.min(...errors))} és {pp(Math.max(...errors))} között van (pp =
               százalékpont).
+            </p>
+            <p className="t-body prose-col mt-3 tabular-nums text-on-surface-muted">
+              A last-click, a lineáris és a time-decay itt szinte egybeesik: a három fizetett
+              csatornán legfeljebb {pp(positionalSpreadPp(data, lookback))} a különbség köztük. Ez a
+              világból jön, nem a modellekből. A vásárló minden látogatása ugyanabból a személyes
+              csatornakeverékből érkezik, és a vásárlás esélye nem függ attól, honnan jött az utolsó.
+              Egy-egy útvonalon a három szabály mást ad, de sok ezer útvonalon az utolsó látogatások
+              ugyanúgy oszlanak meg a csatornák között, mint az összes. A sorrendre épülő szabályok
+              ott válnak szét, ahol a csatornának szerepe van az út elején vagy a végén; ebben a
+              világban ilyen szerep nincs.
+            </p>
+            <p className="t-body prose-col mt-3 tabular-nums text-on-surface-muted">
+              A Markov másképp téved. Ha kivesz egy csatornát, minden útvonal elvész, amelyben az
+              szerepelt, ezért azt díjazza, hány útvonalban van jelen a csatorna, nem azt, mennyit
+              hozott. Ebben az ablakban a(z) {shift.up.title} arányát {pct(shift.up.markov)}-ra
+              emeli (a másik három modell átlaga {pct(shift.up.others)}), a(z) {shift.down.title}{' '}
+              arányát {pct(shift.down.markov)}-ra csökkenti ({pct(shift.down.others)} helyett).
             </p>
           </div>
         </div>

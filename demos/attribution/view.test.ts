@@ -2,8 +2,8 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import {
-  MODELS, chartGroups, chartLabel, ft, int, modelErrors, parseAttribution, pct, pp, roasFmt,
-  shareMax, signedPp, tableRows, windowData,
+  MODELS, chartGroups, chartLabel, ft, int, markovShift, modelErrors, parseAttribution, pct,
+  positionalSpreadPp, pp, roasFmt, shareMax, signedPp, tableRows, windowData,
 } from './view';
 
 // Kezzel irt, a spec 5. fejezete szerinti alak. Ket ablak, kerek szamok.
@@ -116,6 +116,18 @@ describe('a nezet sorai', () => {
     expect(windowData(data, 7).paths).toEqual({ converting: 10, non_converting: 40 });
   });
 
+  it('a sorrend-alapu modellek legnagyobb kulonbsege egy fizetett csatornan', () => {
+    expect(positionalSpreadPp(data, 30)).toBeCloseTo(10);   // Google: 0,35 vs 0,25
+  });
+
+  it('a Markov legnagyobb emelese es csokkentese a masik harom atlagahoz kepest', () => {
+    const { up, down } = markovShift(data, 30);
+    expect(up).toMatchObject({ title: 'Meta Ads', markov: 0.2 });
+    expect(up.others).toBeCloseTo(0.4 / 3);
+    expect(down).toMatchObject({ title: 'Google Ads', markov: 0.2 });
+    expect(down.others).toBeCloseTo(0.85 / 3);
+  });
+
   it('ismeretlen ablak megnevezett hiba', () => {
     expect(() => windowData(data, 14)).toThrow(/nincs 14 napos ablak/);
   });
@@ -173,6 +185,19 @@ describe('a publikalt attribution.json', () => {
       const d = windowData(data, w);
       d.share.last_click.forEach((v, i) => expect(v).toBeCloseTo(first.share.last_click[i], 12));
       expect(d.paths.converting).toBe(first.paths.converting);
+    }
+  });
+
+  // A lap szovege ezt allitja: a harom sorrend-alapu modell szinte egybeesik, a Markov
+  // pedig egy kis csatornat emel es egy nagyot csokkent. Ha a vilag ujragyartasa ezt
+  // megforditja, a szoveget at kell irni.
+  it('a harom sorrend-alapu modell 1 pp-on belul van, a Markov kicsit emel es nagyot csokkent', () => {
+    for (const w of data.windows) {
+      expect(positionalSpreadPp(data, w), `${w} nap`).toBeLessThan(1);
+      const { up, down } = markovShift(data, w);
+      expect(up.markov, `${w} nap`).toBeGreaterThan(up.others);
+      expect(down.markov, `${w} nap`).toBeLessThan(down.others);
+      expect(up.others, `${w} nap`).toBeLessThan(down.others);
     }
   });
 

@@ -1,4 +1,4 @@
-"""A 25. döntés kalibrációs céljai. Ez fogja el a hangolás közbeni elcsúszást:
+"""A 25. és az 58. döntés kalibrációs céljai. Ez fogja el a hangolás közbeni elcsúszást:
 ha valaki a config.py-hoz nyúl, itt derül ki, hogy kiesett a világ a sávból."""
 import pytest
 
@@ -11,12 +11,21 @@ SAVOK = {
     "konverzios_rata": (0.015, 0.021),
     "rendeles": (18_000, 22_000),
     "aov_huf": (16_000, 20_000),
-    "visszatero_arany": (0.25, 0.35),
+    "visszatero_arany": (0.35, 0.50),
     "koltes_bevetel_arany": (0.09, 0.13),
     "fizetett_session_arany": (0.40, 0.46),
     "elfogott_arany_google_ads": (0.27, 0.33),
     "elfogott_arany_meta_ads": (0.06, 0.10),
     "elfogott_arany_arukereso": (0.22, 0.28),
+    # --- lecke-sávok (58. döntés) ---
+    # mmm: a három fizetett csatorna heti költése ne mozogjon együtt (max. páronkénti korreláció)
+    "koltes_paros_korrelacio_max": (-1.0, 0.6),
+    # mmm: a szezon viszont maradjon a költésben, ez a naiv regresszió csapdája (min. csatornánként)
+    "koltes_szezon_korrelacio_min": (0.5, 1.0),
+    # clv: legyen visszatérés, amit modellezni lehet
+    "rendeles_per_vasarlo": (2.5, float("inf")),
+    # clv: az első évben érkezettek érdemi része morzsolódjon le az ablak végére
+    "elso_ev_lemorzsolodott_arany": (0.40, 0.70),
 }
 
 
@@ -37,15 +46,12 @@ def vilag():
 
 
 def test_a_konverzios_rata_nem_sodrodik_el_evek_alatt(vilag):
-    """A napi session-szám Poisson-várhatóértéke NEM függ attól, hány vásárló él
-    még, a populáció viszont lemorzsolódik és sehol nincs utánpótlás. Ha a
-    lemorzsolódás túl gyors, ugyanaz a napi forgalom egyre szűkülő túlélő-körre
-    koncentrálódik, a `_journey_strength` felkúszik, és a konverziós ráta a
-    marketingtől függetlenül emelkedik. A műszer heti bevétel-grafikonján ez
-    hamis trendként jelenne meg: a tényleges és az ellentényes görbe közti rést
-    hirdetési inkrementalitásként olvasnánk, holott populáció-kimerülés.
+    """A napi session-szám Poisson-várhatóértéke NEM függ attól, hány vásárló él. Ha az
+    élők köre szűkül (gyors lemorzsolódás, kevés érkező), ugyanaz a forgalom
+    kevesebb vevőre jut, a `_journey_strength` felkúszik, és a konverziós ráta a
+    marketingtől függetlenül emelkedik. A heti bevétel-grafikonon ez hamis trend volna.
 
-    A `churn_hazard_daily`-k hangolása tartja ezt kordában — ez a teszt a kapu.
+    Az `initial_share` és a `churn_hazard_daily`-k tartják kordában.
     """
     nap = vilag.touches["day"]
     rendeles_nap = vilag.orders["day"]

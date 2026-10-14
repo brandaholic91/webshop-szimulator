@@ -23,6 +23,7 @@ PUBLIC_FILES = (
     "events_sample.json",
     "events_emitted.json",
     "attribution.json",
+    "segments.json",
 )
 
 

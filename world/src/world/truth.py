@@ -17,17 +17,23 @@ mindegyiken 1 teljes + 3 ellentényes világ.
 A 24. döntés miatt ez a modul ÍR két fájlt ugyanabból a memóriában lévő
 eredményből: a truth.json-t a szerződésnek, és a megjelenítési JSON-okat a
 lapnak. Senki nem olvassa újra a truth.json-t — azt csak a compare.py teszi.
+
+A segments műszer igazsága a vásárlónkénti szegmens-címke (57. döntés). A
+populáció-stream a replikákban nem változik (rng.py), ezért ez nem átlag, hanem
+egyetlen kiosztás, customer_key szerint — ugyanaz a kulcs, amit a pipeline lát.
 """
 import json
+import os
 from multiprocessing import Pool
 from pathlib import Path
 
 import numpy as np
 
 from .config import ALL_SLUGS, PAID_SLUGS, WORLD, WorldConfig
-from .dgp import World, run, seasonality
+from .dgp import World, build_population, run, seasonality
+from .emit import customer_key
 from .response import saturate
-from .rng import replica_streams
+from .rng import replica_streams, streams
 
 OUT = Path(__file__).resolve().parents[2] / "out"
 
@@ -35,6 +41,11 @@ OUT = Path(__file__).resolve().parents[2] / "out"
 REF_PONTOK = [0, 2_000, 5_000, 10_000, 20_000, 40_000, 80_000]
 
 REPLICATES = 40   # ennyi újrajátszás átlaga az igazság; a noise.py ugyanezekből méri a szórást
+
+# A replikákat futtató Pool mérete: a logikai magok fele, azaz hyperthreading mellett a
+# fizikai magok. Több processzel a világfuttatás LASSABB: 6 magos, 12 szálas gépen mérve
+# 12 processz 1,0, 6 processz 1,5 világ/s. Csak a sebességet érinti, az eredményt nem.
+WORKERS = max(1, (os.cpu_count() or 2) // 2)
 
 
 def _heti_bevetel(w: World) -> list[float]:
@@ -94,7 +105,7 @@ def mean_incrementality(cfg: WorldConfig,
     inkrementális = teljes − ellentényes, arány = inkrementális / teljes.
     A költés minden replikán ugyanaz.
     """
-    with Pool() as pool:
+    with Pool(WORKERS) as pool:
         futasok = pool.starmap(incrementality, [(cfg, r) for r in range(1, replicates + 1)])
 
     def atlag(ertekek):
@@ -110,6 +121,37 @@ def mean_incrementality(cfg: WorldConfig,
             nelkule_heti=atlag(c["weekly_revenue_counterfactual"] for c in csatorna).tolist(),
         )
     return ki, atlag(heti for _, heti in futasok).tolist()
+
+
+def segment_assignment(cfg: WorldConfig) -> dict[str, str]:
+    """Vásárlónként a latens szegmens slugja, customer_key szerint (57. döntés).
+
+    Ugyanaz a populáció, amit a run() épít: a population stream a seedből jön, és a
+    replikák nem nyúlnak hozzá. A kulcs az emit.customer_key uuid5-je, amit a
+    pipeline identity_links.customer_key-ként lát; a compare így névre illeszt.
+    """
+    s = streams(cfg.seed)
+    pop = build_population(cfg, s["population"], s["lifetime"])
+    slugok = [s.slug for s in cfg.segments]
+    return {customer_key(cfg.seed, i): slugok[int(idx)] for i, idx in enumerate(pop.segment_idx)}
+
+
+def channel_audience(cfg: WorldConfig, w: World) -> dict[str, dict]:
+    """Fizetett csatornánként: hány sessiont hozott a hirdetés, és kik kapták.
+
+    A session a csatorna saját sessionje (base_channel), az elfogás előtt: az
+    elfogott organic és direct látogató hirdetés nélkül is megjött volna. A
+    közönség a sessionök szegmens-aránya, a cfg.segments sorrendjében. A lap ebből
+    mutatja meg, miért ér többet egy csatorna látogatása, mint a másiké.
+    """
+    ki = {}
+    for s in PAID_SLUGS:
+        sajat = w.touches["base_channel"] == ALL_SLUGS.index(s)
+        szegmens = w.population.segment_idx[w.touches["customer"][sajat]]
+        db = np.bincount(szegmens, minlength=len(cfg.segments))
+        ki[s] = {"paid_sessions": int(sajat.sum()),
+                 "audience": [float(x) for x in db / max(int(db.sum()), 1)]}
+    return ki
 
 
 def build_truth(cfg: WorldConfig, replicates: int = REPLICATES) -> tuple[dict, dict]:
@@ -140,6 +182,7 @@ def build_truth(cfg: WorldConfig, replicates: int = REPLICATES) -> tuple[dict, d
                      "churn_hazard_daily": s.churn_hazard_daily}
             for s in cfg.segments
         },
+        "segment_assignment": segment_assignment(cfg),
         "incrementality": {
             s: {k: v for k, v in inc[s].items() if k != "weekly_revenue_counterfactual"}
             for s in PAID_SLUGS
@@ -184,7 +227,9 @@ def main() -> None:
         "channels": list(PAID_SLUGS),
         "daily_huf": w.spend.astype(int).T.tolist(),
     })
+    kozonseg = channel_audience(cfg, w)
     _write("world_response.json", {
+        "segments": [s.slug for s in cfg.segments],
         "channels": [
             {
                 "slug": s,
@@ -192,6 +237,8 @@ def main() -> None:
                 "half_saturation_huf": cfg.channel(s).half_saturation,
                 "shape": cfg.channel(s).saturation_shape,
                 "reach_scale": cfg.channel(s).reach_scale,
+                # A bolt egy futásából (amit a többi elemzés mér), nem a replikák átlagából.
+                **kozonseg[s],
             }
             for s in PAID_SLUGS
         ],

@@ -13,13 +13,14 @@ ellentényes újrafuttatásból jön (`DECISIONS.md` 9., 24-27.).
     uv run python -m world.load         # emit -> HTTP -> a lokális világ-instance
     uv run python -m world.export       # SQL -> out/events_*.json
     uv run python -m world.attribution  # DB -> négy modell -> out/attribution.json
+    uv run python -m world.segments     # DB -> k-means -> out/segments.json
 
 ## Amit tudni kell
 
 - `SEED = 20260827`. Ugyanaz a seed -> ugyanaz a világ.
 - A `rng.py` `LAYERS` tuple-jébe **csak a végére** szabad új réteget fűzni.
 - A `truth.json` **nem** megy a `public/data/`-ba, és csak a `compare.py` olvassa.
-- A `load`, az `export` és az `attribution` futó világ-instance-ot kér (`~/Playground/fp-collector`,
+- A `load`, az `export`, az `attribution` és a `segments` futó világ-instance-ot kér (`~/Playground/fp-collector`,
   `docker-compose.world.yml`), és **csak `localhost` / `127.0.0.1` címre megy**.
 - Az `export` nem ír fájlt, ha a pipeline száma nem egyezik az emit által elküldöttel. Próbafutás
   után (`--days N`) az instance-ot üríteni kell: `docker compose -f docker-compose.world.yml down -v`.

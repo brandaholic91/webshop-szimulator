@@ -10,6 +10,7 @@ import World from './world/World';
 import Peek from './peek/Peek';
 import Events from './events/Events';
 import Attribution from './attribution/Attribution';
+import Segments from './segments/Segments';
 
 export type InstrumentStatus = 'live' | 'wip' | 'todo';
 
@@ -46,7 +47,7 @@ export const instruments: Instrument[] = [
     slug: 'attribution',
     num: '01.3',
     title: 'Attribúció',
-    lede: 'Melyik hirdetés hozta a vásárlást? Négy elterjedt számítási mód négy választ ad, itt pedig a helyes is ismert.',
+    lede: 'Melyik hirdetés hozta a vásárlást? Négy elterjedt számítási mód, és ebben a boltban az is kiderül, melyik mennyit téved.',
     question: 'Melyik hirdetés hozta a vásárlást? Négy számítási mód, négy válasz',
     status: 'live',
     component: Attribution,
@@ -64,9 +65,10 @@ export const instruments: Instrument[] = [
     slug: 'segments',
     num: '01.5',
     title: 'Szegmensek',
-    lede: 'Klaszter-visszanyerés latens típusokra',
+    lede: 'Megtalálja-e a gép a vásárlótípusokat, amelyeket a világba írtam? Egy elterjedt klaszterező eljárás; az elemző dönti el, mit lát belőle a modell, és hány csoportot keressen.',
     question: 'Megtalálja-e a gép a vásárlótípusokat, amelyeket a világba írtam',
-    status: 'wip',
+    status: 'live',
+    component: Segments,
   },
   {
     slug: 'forecast',
